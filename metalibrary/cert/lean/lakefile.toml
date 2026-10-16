@@ -1,0 +1,5 @@
+name = "MetalibCert"
+defaultTargets = ["MetalibCert"]
+
+[[lean_lib]]
+name = "MetalibCert"
