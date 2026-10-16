@@ -1,0 +1,7 @@
+# Python packages for the scripts in metalibrary/ and site/. numpy everywhere; scipy only for
+# colour_solver.py (the integer LP); matplotlib only for plot_e2.py (the published pictures were
+# drawn with matplotlib 3.10.8). The Python standard library is enough for cert/check.py,
+# cert/selftest.py and site/build_site.py.
+numpy==2.5.4
+scipy==1.18.1
+matplotlib==3.10.8

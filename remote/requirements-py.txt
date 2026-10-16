@@ -1,0 +1,4 @@
+# Python packages for jobs on the remote box (remote/py-env.sh). Same pins as ../requirements.txt,
+# without matplotlib (pictures are drawn locally).
+numpy==2.5.4
+scipy==1.18.1
