@@ -156,7 +156,7 @@ FOOTER = {
     "en": """A recomputation for R. Mikhailov's lecture “Coloured metalibraries. The mind of space”
 (2 September 2016). Data as of {date}. All numbers on these pages are 3-primary: the rank of the 3-torsion, all summands $\\mathbb Z/3$.""",
 }
-# a footer line of its own on the pages that offer something on request (the verifiability page)
+# a footer line of its own on the verifiability page: whom to write to about the proof
 CONTACT = {"ru": 'Связаться с нами: <a href="https://vissi.su">vissi.su</a>',
            "en": 'Contact: <a href="https://vissi.su">vissi.su</a>'}
 
@@ -619,7 +619,7 @@ $a(k,j)=(-1)^{{j+1}}\\binom{{2(k-j)-1}}{{j}}$, $b(k,j)=(-1)^j\\binom{{2(k-j)}}{{
 <h2>Границы</h2>
 <ul><li>Хищное правило окончательно до $n={last}$; таблица Тоды 2003 года — до $n={tmax}$, так что сравнение с ней — до $n={tlast}$.</li>
 <li>Тода 2003 $\\le E_2$ во всех $n\\le{tmax}$.</li></ul>
-<p class="muted">Код — в рабочем репозитории; пришлём по запросу.</p>""", f"""
+<p class="muted">Код открыт: <a href="https://github.com/ispacex/meta-rapacious">ispacex/meta-rapacious</a>.</p>""", f"""
 <h2>The lambda algebra</h2>
 <p>The conventions are those of S. O. Ivanov, R. Mikhailov and J. Wu, <a href="https://arxiv.org/abs/1506.00952">arXiv:1506.00952</a>, §2, at $p=3$:
 $\\deg\\lambda_i=4i-1$ ($i\\ge1$), $\\deg\\mu_j=4j$ ($j\\ge0$),
@@ -647,7 +647,7 @@ A word is admissible if the index following $\\lambda_i$ is $\\le 3i-1$ and the 
 <h2>Limits</h2>
 <ul><li>The rapacious rule is final up to $n={last}$; Toda's 2003 table goes up to $n={tmax}$, so the comparison with it goes up to $n={tlast}$.</li>
 <li>Toda 2003 $\\le E_2$ for all $n\\le{tmax}$.</li></ul>
-<p class="muted">The code is in our working repository; we will send it on request.</p>"""))
+<p class="muted">The code is open: <a href="https://github.com/ispacex/meta-rapacious">ispacex/meta-rapacious</a>.</p>"""))
 
     # ---------- data ----------
     page(lang, "data.html", t("Данные", "Data"), t(f"""
@@ -694,7 +694,8 @@ A word is admissible if the index following $\\lambda_i$ is $\\le 3i-1$ and the 
 <ul>
 <li><a href="https://github.com/ispacex/dimension-subrings">ispacex/dimension-subrings</a> — вычисления и Lean по размерным подгруппам: вопрос $D_5(G)\\subseteq\\gamma_4(G)$ для групп. Сопутствующая работа к статье В. Ионина, Р. В. Михайлова и Т. Петрова <i>Dimension subrings of Lie rings</i> (<a href="https://arxiv.org/abs/2610.02042">arXiv:2610.02042</a>), где аналогичное включение доказано для колец Ли. К метабиблиотеке отношения не имеет.</li>
 <li><a href="https://gitlab.com/ispacex/cflint-fast-core">ispacex/cflint-fast-core</a> (GitLab) — быстрое ядро для целочисленных размерных подгрупп $D_n(G)$ конечных $p$-групп (C/FLINT).</li>
-<li><a href="https://github.com/ispacex/metalibrary">ispacex/metalibrary</a> — данные и страницы этого сайта; сертификаты проверки выложены его <a href="https://github.com/ispacex/metalibrary/releases/tag/certificates-2026-10-15">релизом</a>. Кода самого пересчёта там нет: он доступен по запросу (<a href="verify.html">проверяемость</a>).</li>
+<li><a href="https://github.com/ispacex/meta-rapacious">ispacex/meta-rapacious</a> — код пересчёта: лямбда-алгебра, $E^2$ метабиблиотеки по цвету (Python и Rust), хищное правило, генератор и проверялки сертификатов, Lean-проект и генератор этого сайта (лицензия MIT).</li>
+<li><a href="https://github.com/ispacex/metalibrary">ispacex/metalibrary</a> — данные и страницы этого сайта; сертификаты проверки выложены его <a href="https://github.com/ispacex/metalibrary/releases/tag/certificates-2026-10-15">релизом</a>. Страницы собираются кодом из <a href="https://github.com/ispacex/meta-rapacious">ispacex/meta-rapacious</a> (<a href="verify.html">проверяемость</a>).</li>
 </ul>""", f"""
 <p>We tried to reproduce the “rapacious spectral sequence” from the first lecture of the course “Coloured metalibraries. The mind of space” (R. Mikhailov, 2 September 2016): to compute the $E^2$ page of the coloured metalibrary and to apply to it the rule “eat yourself as fast as possible, constrained only by colour”.</p>
 <h2>Results</h2>
@@ -717,7 +718,8 @@ A word is admissible if the index following $\\lambda_i$ is $\\le 3i-1$ and the 
 <ul>
 <li><a href="https://github.com/ispacex/dimension-subrings">ispacex/dimension-subrings</a>: computations and Lean on dimension subgroups, the question $D_5(G)\\subseteq\\gamma_4(G)$ for groups. A companion to the paper of V. Ionin, R. Mikhailov and T. Petrov, <i>Dimension subrings of Lie rings</i> (<a href="https://arxiv.org/abs/2610.02042">arXiv:2610.02042</a>), which proves the analogous inclusion for Lie rings. It is not about the metalibrary.</li>
 <li><a href="https://gitlab.com/ispacex/cflint-fast-core">ispacex/cflint-fast-core</a> (GitLab): a fast core for integral dimension subgroups $D_n(G)$ of finite $p$-groups (C/FLINT).</li>
-<li><a href="https://github.com/ispacex/metalibrary">ispacex/metalibrary</a>: the data and the pages of this site; the verification certificates are published as its <a href="https://github.com/ispacex/metalibrary/releases/tag/certificates-2026-10-15">release</a>. The code of the recomputation itself is not there: it is available on request (<a href="verify.html">verifiability</a>).</li>
+<li><a href="https://github.com/ispacex/meta-rapacious">ispacex/meta-rapacious</a>: the code of the recomputation: the lambda algebra, the $E^2$ of the metalibrary by colour (Python and Rust), the rapacious rule, the generator and the checkers of the certificates, the Lean project and the generator of this site (MIT license).</li>
+<li><a href="https://github.com/ispacex/metalibrary">ispacex/metalibrary</a>: the data and the pages of this site; the verification certificates are published as its <a href="https://github.com/ispacex/metalibrary/releases/tag/certificates-2026-10-15">release</a>. The pages are built by the code in <a href="https://github.com/ispacex/meta-rapacious">ispacex/meta-rapacious</a> (<a href="verify.html">verifiability</a>).</li>
 </ul>"""))
 
     # ---------- verifiability ----------
@@ -768,7 +770,7 @@ A word is admissible if the index following $\\lambda_i$ is $\\le 3i-1$ and the 
 <p><b>Сертификаты выложены:</b> <a href="https://github.com/ispacex/metalibrary/releases/download/certificates-2026-10-15/cert_49_50_51.tar.gz">cert_49_50_51.tar.gz</a> (1,5 МБ),
 <a href="https://github.com/ispacex/metalibrary/releases/download/certificates-2026-10-15/cert_59_60.tar.gz">cert_59_60.tar.gz</a> (19 МБ), контрольные суммы — <a href="https://github.com/ispacex/metalibrary/releases/download/certificates-2026-10-15/SHA256SUMS">SHA256SUMS</a>
 (<a href="https://github.com/ispacex/metalibrary/releases/tag/certificates-2026-10-15">релиз</a>). В архиве — по файлу на блок и на ненулевую клетку в формате, описанном выше.</p>
-<p><b>Код генератора, проверялки и Lean-проекта доступен по запросу.</b></p>
+<p><b>Код генератора, проверялки и Lean-проекта открыт:</b> <a href="https://github.com/ispacex/meta-rapacious">ispacex/meta-rapacious</a>, каталог <a href="https://github.com/ispacex/meta-rapacious/tree/main/metalibrary/cert"><code>metalibrary/cert</code></a> (там же — как повторить проверку).</p>
 """, """
 <p>The main conclusion of the comparison is that the rapacious rule leaves more classes than Toda's 2003 table. So that this
 need not rest on trust in our program, for the first five disagreements we made a proof that can be checked independently.</p>
@@ -815,7 +817,7 @@ program with a theorem about the result of its own run.</li>
 <p><b>The certificates are published:</b> <a href="https://github.com/ispacex/metalibrary/releases/download/certificates-2026-10-15/cert_49_50_51.tar.gz">cert_49_50_51.tar.gz</a> (1.5 MB),
 <a href="https://github.com/ispacex/metalibrary/releases/download/certificates-2026-10-15/cert_59_60.tar.gz">cert_59_60.tar.gz</a> (19 MB), checksums in <a href="https://github.com/ispacex/metalibrary/releases/download/certificates-2026-10-15/SHA256SUMS">SHA256SUMS</a>
 (<a href="https://github.com/ispacex/metalibrary/releases/tag/certificates-2026-10-15">release</a>). Each archive holds one file per block and per non-zero cell, in the format described above.</p>
-<p><b>The code of the generator, the checker and the Lean project is available on request.</b></p>
+<p><b>The code of the generator, the checker and the Lean project is open:</b> <a href="https://github.com/ispacex/meta-rapacious">ispacex/meta-rapacious</a>, directory <a href="https://github.com/ispacex/meta-rapacious/tree/main/metalibrary/cert"><code>metalibrary/cert</code></a> (with how to repeat the check).</p>
 """), contact=True)
 
     # ---------- notes on sources ----------
