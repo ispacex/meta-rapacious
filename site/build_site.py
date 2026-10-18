@@ -30,6 +30,7 @@ import csv
 import html
 import json
 import pathlib
+import re
 import shutil
 import sys
 
@@ -120,7 +121,7 @@ KATEX = """<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.
 
 def plain(s):
     """Text for <title>: no KaTeX there."""
-    for a, b in (("\\pi", "π"), ("^2", "²"), ("^3", "³"), ("$", ""), ("\\", "")):
+    for a, b in (("\\pi", "π"), ("_n", "ₙ"), ("^2", "²"), ("^3", "³"), ("$", ""), ("\\", "")):
         s = s.replace(a, b)
     return s
 
@@ -129,6 +130,39 @@ PAGES = []  # (lang, file, title, body) of every page, for the search index
 ORIGIN = "https://ispacex.github.io"
 BASE = "/metalibrary/"  # where GitHub Pages serves the site
 SECTION = {"ru": "Метабиблиотека", "en": "Metalibrary"}
+
+
+# Link previews (Telegram and the like): Open Graph tags on every page. The image is one card per
+# language, site/og-<lang>.png, drawn by site/og_card.py (run it again when the title changes); the
+# description is the page's first paragraph when it says something and has no formulas,
+# else the site's.
+SITE_DESC = {"ru": "3-кручение гомотопических групп S²: лист E² и «хищная спектралка» из лекции "
+                   "Р. В. Михайлова, посчитанные заново.",
+             "en": "The 3-torsion of the homotopy groups of S²: the E² page and the rapacious spectral "
+                   "sequence from R. Mikhailov's lecture, recomputed."}
+
+
+def blurb(lang, body):
+    m = re.search(r"<p>(.*?)</p>", body, re.S)
+    text = html.unescape(re.sub(r"<[^>]+>", "", m.group(1))) if m else ""
+    text = " ".join(text.split())
+    if len(text) < 60 or "$" in text or "\\" in text:
+        return SITE_DESC[lang]
+    return text if len(text) <= 200 else text[:200].rsplit(" ", 1)[0] + "…"
+
+
+def og_tags(lang, fn, title, desc):
+    d = html.escape(desc)
+    return (f'\n<meta name="description" content="{d}">'
+            f'\n<meta property="og:type" content="website">'
+            f'\n<meta property="og:site_name" content="{html.escape(SITE_TITLE[lang])}">'
+            f'\n<meta property="og:title" content="{html.escape(title)}">'
+            f'\n<meta property="og:description" content="{d}">'
+            f'\n<meta property="og:url" content="{ORIGIN}{url(lang, fn)}">'
+            f'\n<meta property="og:locale" content="{"ru_RU" if lang == "ru" else "en_US"}">'
+            f'\n<meta property="og:image" content="{ORIGIN}{BASE}og-{lang}.png">'
+            f'\n<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">'
+            f'\n<meta name="twitter:card" content="summary_large_image">')
 
 
 def url(lang, fn):
@@ -213,7 +247,7 @@ def page(lang, fn, title, body, contact=False):
     doc = f"""<!doctype html>
 <html lang="{lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 {THEME_HEAD}
-<title>{html.escape(plain(title))} — {SITE_TITLE[lang]}</title>{alt}
+<title>{html.escape(plain(title))} — {SITE_TITLE[lang]}</title>{alt}{og_tags(lang, fn, plain(title) if fn == "index.html" else f"{plain(title)} — {SITE_TITLE[lang]}", blurb(lang, body))}
 <style>{CSS}</style>{KATEX}</head>
 <body><header><div class="wrap"><div class="top"><a class="title" href="index.html">{SITE_TITLE[lang]}</a>
 <div class="tools"><span class="pal"></span>{theme_switch(lang)}{switch}</div></div>
@@ -393,6 +427,8 @@ def main():
     nblocks = write_search({h: i for i, (h, _, _) in enumerate(NAV)})
     moved_from_en()
     print("search index:", sum(1 for p in PAGES if p[1] != "search.html"), "pages,", nblocks, "blocks")
+    for lang in LANGS:
+        shutil.copy(HERE / f"og-{lang}.png", OUT / f"og-{lang}.png")
     (OUT / ".nojekyll").write_text("")
     print("site written to", OUT, "| final up to n =", last, "| agree up to", agree_upto, "| disagreements", dis)
 
