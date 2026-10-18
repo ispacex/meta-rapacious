@@ -14,7 +14,7 @@ the site, https://ispacex.github.io/metalibrary/, which `../site/build_site.py` 
 ## What is computed
 
 1. **The mod-3 lambda algebra** (`lambda3.py`): relations, differential and admissibility
-   following Ivanov–Mikhailov–Wu (arXiv:1506.00952, §2), rewriting into the admissible basis.
+   following Ivanov–Mikhailov–Wu ([arXiv:1506.00952](https://arxiv.org/abs/1506.00952), §2), rewriting into the admissible basis.
    The paper has $N(k)=k-[\tfrac{k+1}{p}]$; the brackets are taken here as the ceiling: with the
    floor, the relation for $k=1$ would contain its own left-hand side.
 2. **Checks** (`check_lambda.py`): $\partial^2=0$ and $\partial\Lambda(1)\subseteq\Lambda(1)$
