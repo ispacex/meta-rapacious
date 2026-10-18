@@ -48,7 +48,7 @@ $n=72$ was stopped half-way; beyond that the computation went to a remote machin
     The forks at $\pi_{41},\pi_{43}$ are decided in favour of the "low" filling;
   - $\pi_{44}=0$ and $\pi_{48}=0$;
   - beyond that the rule leaves extra classes: in $\pi_{49},\pi_{50},\pi_{51},\pi_{59},\pi_{60},\pi_{63}$
-    (1–2 more than Toda). In $\pi_{49}$–$\pi_{60}$ they are removed by colour-preserving $d_5$:
+    (1–2 more than Toda). In $\pi_{49}\text{–}\pi_{60}$ they are removed by colour-preserving $d_5$:
     $\pi_{50}(5,0)\to\pi_{49}(10,0)$, $\pi_{51}(5,1)\to\pi_{50}(10,1)$, $\pi_{60}(7,0)\to\pi_{59}(12,0)$.
     Allowing all such $d_5$ breaks $\pi_{57},\pi_{58}$;
   - colour $-1$ gives no differential at all: $\pi_{44}$ stays equal to 4.
@@ -72,7 +72,7 @@ The result is `data/e2_colours.csv`: `status = determined` or `range lo..hi`.
 
 ## Colour modulo 4
 
-The stem of a word is $4\sum(\text{indices})-\#\lambda$, so
+The stem of a word is $`4\sum(\text{indices})-\#\lambda`$, so
 $\text{colour}\equiv\text{stem}+s \pmod 4$. Hence an arrow "colour $+1$" is possible only for
 $r\equiv2\pmod4$, that is, for $d_2, d_6, d_{10},\dots$. The colour itself is a separate grading:
 the number of Bocksteins, the $Q$-degree in Ext. The Ext of sseq does not see it, which is why the
@@ -86,7 +86,7 @@ metalibrary had to be computed here.
 - `compare_sseq.py`: the comparison with sseq/ext.
 - `rapacious.py`: the rapacious rule, its variants and checks; `--list` prints the differentials.
 - `plot_e2.py`: the picture `out/7_e2_rapacious_{ru,en}.png`.
-- `data/e2_metalib.csv`: $n,s,\text{colour},\#\text{words},\operatorname{rank}\partial,\dim E^2$;
+- `data/e2_metalib.csv`: $`n,s,\text{colour},\#\text{words},\mathrm{rank}\,\partial,\dim E^2`$;
   `data/e2_lambda1.csv`: the same for $\Lambda(1)$ up to $\pi_{46}$;
   `data/sseq_S3_p3.csv`: the Ext from sseq up to $n=86$; `data/rapacious.json`: the outcome of the rule.
 - `colour_solver.py`, `colours_to_e2.py`: colours without enumeration (above); `data/e2_colours.csv`, `data/e2_full.csv`.
@@ -100,7 +100,7 @@ metalibrary had to be computed here.
 - `data/s2_3torsion.csv`: the 3-torsion of $\pi_n(S^2)$ by Toda's 1962 table ($n\le22$, column
   `toda_rank`), the Toda elements and sandwiches (Ivanov–Mikhailov–Wu) and the statements of the
   lecture; checked against two reprints of Toda's table (Ravenel, Table A3.4, and the PKU table).
-- `cert/`: verifiable certificates of the rule's disagreement with Toda in $\pi_{49}$–$\pi_{51}$,
+- `cert/`: verifiable certificates of the rule's disagreement with Toda in $\pi_{49}\text{–}\pi_{51}$,
   $\pi_{59}$, $\pi_{60}$ ([`cert/README.md`](cert/README.md)).
 
 ## Reproducing the sseq data

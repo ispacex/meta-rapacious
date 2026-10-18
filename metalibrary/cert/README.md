@@ -34,7 +34,7 @@ such a way that the check does not depend on our code that computed $E^2$ (`lamb
      computing $d$. On average $y$ has one and a half words.
    - *A nonzero cell* of dimension $h$: $h$ cycles $z$ ($dz=0$) and $h$ cocycles $\varphi$
      ($\varphi\circ d=0$ on the cell above) with an invertible matrix $\varphi_j(z_i)$; hence $\dim\ge h$.
-   - From the lower bounds on the ranks: $\dim\le\#\text{words}-\operatorname{rk}_\text{out}-\operatorname{rk}_\text{in}$.
+   - From the lower bounds on the ranks: $`\dim\le\#\text{words}-\mathrm{rk}_\text{out}-\mathrm{rk}_\text{in}`$.
      Together this is the exact dimension.
 3. **The checker** `check.py` is written from scratch following arXiv:1506.00952, §2 (relations,
    $\partial$, admissibility, enumeration of words) and imports nothing from `metalibrary/`. Its
