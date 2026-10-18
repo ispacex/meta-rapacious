@@ -152,9 +152,11 @@ def palette(lang):
 
 FOOTER = {
     "ru": """Пересчёт к лекции Р. В. Михайлова «Цветные метабиблиотеки. Разум пространства»
-(02.09.2016). Данные от {date}. Все числа на этих страницах — 3-примарные: ранг 3-кручения, все слагаемые $\\mathbb Z/3$.""",
+(02.09.2016). Данные от {date}. Все числа на этих страницах — 3-примарные: ранг 3-кручения, все слагаемые $\\mathbb Z/3$.<br>
+Раздел <a href="https://ispacex.github.io/ru/math/">«Математика»</a> на ispacex.github.io.""",
     "en": """A recomputation for R. Mikhailov's lecture “Coloured metalibraries. The mind of space”
-(2 September 2016). Data as of {date}. All numbers on these pages are 3-primary: the rank of the 3-torsion, all summands $\\mathbb Z/3$.""",
+(2 September 2016). Data as of {date}. All numbers on these pages are 3-primary: the rank of the 3-torsion, all summands $\\mathbb Z/3$.<br>
+Part of <a href="https://ispacex.github.io/math/">Mathematics</a> at ispacex.github.io.""",
 }
 # a footer line of its own on the verifiability page: whom to write to about the proof
 CONTACT = {"ru": 'Связаться с нами: <a href="https://vissi.su">vissi.su</a>',
