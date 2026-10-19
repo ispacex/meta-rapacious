@@ -298,6 +298,15 @@ def tex_text(s):
     return re.sub(r"\s+", " ", s.replace("$", "").replace("{", "").replace("}", "")).strip()
 
 
+def index_text(s):
+    """A block of text for the search index: its formulas kept as the TeX they are, between their $
+    (FORMAT.md of sitesearch). The engine folds \\pi, π and \\[Pi] to one spelling, matches a formula
+    with its spaces gone and draws it in a result with KaTeX, so a formula flattened here — $\\pi_{49}$
+    as π49 — would be found by nothing the reader types. Titles stay tex_text: the palette shows them
+    as they are."""
+    return re.sub(r"\s+", " ", s).strip()
+
+
 def blocks_of(body):
     """The pieces of text of a page (FORMAT.md of sitesearch): paragraphs, list items, table rows,
     each with the heading above it."""
@@ -331,7 +340,7 @@ def blocks_of(body):
             self.buf.append(data)
 
         def flush(self):
-            text = tex_text(html.unescape("".join(self.buf)))
+            text = index_text(html.unescape("".join(self.buf)))
             self.buf = []
             return text.strip(" ·")
 
@@ -972,6 +981,7 @@ This page searches the English pages; <a href="ru/search.html" hreflang="ru">the
 The search is the engine of <a href="https://ispacex.github.io/en/search/">ispacex.github.io</a>; ⌘K / Ctrl-K on any page opens the jump to a section.</small></p>
 """) + f"""<style>#results li{{margin:0 0 1.1em}} #results .where{{font-size:.85em;color:var(--muted)}} #results mark{{background:rgba(255,200,80,.35);color:inherit}}</style>
 <script src="/sitesearch/search.js"></script>
+<script src="/sitesearch/symbols.js"></script>
 <script>SiteSearch.mount({{input: 'q', status: 'status', results: 'results', sources: [{{ url: '{BASE}search-index.json' }}]}});</script>""")
 
 
