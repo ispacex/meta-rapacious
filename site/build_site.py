@@ -181,7 +181,7 @@ PLACEHOLDER = {"ru": "Куда идём? например: хищное прав
 def palette(lang):
     return (f'<script src="/sitesearch/palette.js" data-index="{BASE}nav-index.json" data-mount="header .pal" '
             f'data-search="{url(lang, "search.html")}" data-search-index="{BASE}search-index.json" '
-            f'data-placeholder="{PLACEHOLDER[lang]}" defer></script>')
+            f'data-placeholder="{PLACEHOLDER[lang]}" data-symbols="true" defer></script>')
 
 
 FOOTER = {
