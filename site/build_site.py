@@ -7,7 +7,7 @@ The static site with the results: https://ispacex.github.io/metalibrary/
     site/two_tier.sh OUT_DIR                    # search index into the form ispacex's engine reads
 
 Reads only data that is already computed (no new computation): metalibrary/data/*.csv,
-metalibrary/toda2003.py, metalibrary/out/7_e2_rapacious_{ru,en}.png.
+metalibrary/toda2003.py, metalibrary/out/7_e2_rapacious_{ru,en}{,_dark}.png.
 The rapacious rule is re-run on that data (a fraction of a second). The output is a static
 site (HTML, KaTeX from jsDelivr, CSV/JSON downloads) published from the public repository
 ispacex/metalibrary via GitHub Pages; the code that makes it is this repository.
@@ -32,6 +32,7 @@ import json
 import pathlib
 import re
 import shutil
+import struct
 import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -109,6 +110,11 @@ tr.bad td { background:var(--bad); } td.bad { background:var(--bad); color:var(-
 td.amb { background:var(--amb); } td.ok { background:var(--ok); }
 .box { border-left:4px solid var(--acc); background:var(--soft); padding:.7rem 1rem; margin:1rem 0; border-radius:0 6px 6px 0; }
 img { max-width:100%; height:auto; border:1px solid var(--line); border-radius:6px; background:#fff; padding:var(--imgpad); }
+/* a picture drawn twice (plot_e2.py): .lt on white, .dk on the dark theme's background, shown with the theme */
+img.dk { display:none; background:var(--bg); padding:0; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) img.lt { display:none; }
+                                      :root:not([data-theme="light"]) img.dk { display:inline; } }
+:root[data-theme="dark"] img.lt { display:none; } :root[data-theme="dark"] img.dk { display:inline; }
 code { background:var(--soft); padding:0 .25em; border-radius:3px; }
 footer { border-top:1px solid var(--line); margin-top:3rem; }
 """
@@ -421,11 +427,12 @@ def main():
     json.dump({"note": f"rapacious rule on E^2 of the metalibrary, n <= {nmax} (final up to {last})",
                "low": diffs_l, "high": diffs_h, "low_with_colour_preserving_d5": diffs_5},
               open(OUT / "data" / "differentials.json", "w"), ensure_ascii=False, indent=1, default=list)
-    # the picture, drawn by metalibrary/plot_e2.py in both languages: the English one at the root,
-    # the Russian one beside the Russian pages under the same name
-    shutil.copy(ROOT / "metalibrary" / "out" / "7_e2_rapacious_en.png", OUT / "e2_rapacious.png")
+    # the picture, drawn by metalibrary/plot_e2.py in both languages and both themes: the English one
+    # at the root, the Russian one beside the Russian pages under the same name; _dark for the dark theme
     (OUT / "ru").mkdir()
-    shutil.copy(ROOT / "metalibrary" / "out" / "7_e2_rapacious_ru.png", OUT / "ru" / "e2_rapacious.png")
+    for th in ("", "_dark"):
+        shutil.copy(ROOT / "metalibrary" / "out" / f"7_e2_rapacious_en{th}.png", OUT / f"e2_rapacious{th}.png")
+        shutil.copy(ROOT / "metalibrary" / "out" / f"7_e2_rapacious_ru{th}.png", OUT / "ru" / f"e2_rapacious{th}.png")
 
     v = dict(E2=E2, El=El, nmax=nmax, last=last, nbrute=nbrute, nseq=nseq, sseq_n=sseq_n, t62=t62, t03=t03,
              tmax=tmax, tlast=tlast, left_l=left_l, left_h=left_h, left_5=left_5, diffs_l=diffs_l,
@@ -533,17 +540,21 @@ def site(lang, v):
         rowsE.append([n, len(cl), (" ".join(f"({s},{c})" for s, c in cl), "l"),
                       (" ".join(f"({s},{c})" for s, c in surv) if n <= last else "—", "l"), fam,
                       t03.get(n, 0) if n <= tmax else "—"])
+    # the size of the picture in this language (the two themes have the same), so the page keeps its
+    # place while the picture loads
+    png = (OUT / "ru" if lang == "ru" else OUT) / "e2_rapacious.png"
+    E2WH = 'width="%d" height="%d"' % struct.unpack(">II", png.read_bytes()[16:24])
     page(lang, "e2.html", t("Классы E² по длине и цвету", "E² classes by length and colour"), t(f"""
 <p>Каждый класс записан как (s, c): $s$ — длина слова (фильтрация Адамса), $c$ — цвет (число букв $\\mu$).
 Цвета до $n={nmax}$ — $Q$-вес Ext; поклеточно проверены прямым счётом метабиблиотеки (<a href="method.html">метод</a>). «Осталось» — после хищного правила (цвет $+1$, «low»).
 В колонке «семейство» — класс, стоящий на месте элемента Тоды ($n=4k+2$) или сэндвича ($n=4m+1$). Цвета этих классов идут 3 4 4 5 5 6 …, как сказано в лекции.</p>
-<p><img src="e2_rapacious.png" alt="E² метабиблиотеки и хищные дифференциалы"></p>
+<p><img class="lt" src="e2_rapacious.png" alt="E² метабиблиотеки и хищные дифференциалы" {E2WH} loading="lazy"><img class="dk" src="e2_rapacious_dark.png" alt="E² метабиблиотеки и хищные дифференциалы" {E2WH} loading="lazy"></p>
 <p class="muted">На картинке — до $n=100$; таблица ниже — до $n={nmax}$.</p>
 """, f"""
 <p>Each class is written as (s, c): $s$ is the length of the word (the Adams filtration), $c$ is the colour (the number of letters $\\mu$).
 The colours up to $n={nmax}$ are the $Q$-weight of Ext, checked cell by cell against a direct computation of the metalibrary (<a href="method.html">method</a>). “Left” means after the rapacious rule (colour $+1$, “low”).
 The column “family” gives the class standing in the place of a Toda element ($n=4k+2$) or of a sandwich ($n=4m+1$). The colours of these classes run 3 4 4 5 5 6 …, as stated in the lecture.</p>
-<p><img src="e2_rapacious.png" alt="E² of the metalibrary and the rapacious differentials"></p>
+<p><img class="lt" src="e2_rapacious.png" alt="E² of the metalibrary and the rapacious differentials" {E2WH} loading="lazy"><img class="dk" src="e2_rapacious_dark.png" alt="E² of the metalibrary and the rapacious differentials" {E2WH} loading="lazy"></p>
 <p class="muted">The picture goes up to $n=100$; the table below, up to $n={nmax}$.</p>
 """) + f"""{table(t(["n", "dim E²", "<l>классы (s, c)", "<l>осталось после правила", "семейство (s, c)", "Тода 2003"],
                    ["n", "dim E²", "<l>classes (s, c)", "<l>left after the rule", "family (s, c)", "Toda 2003"]), rowsE)}
