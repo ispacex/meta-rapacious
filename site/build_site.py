@@ -32,6 +32,7 @@ import json
 import pathlib
 import re
 import shutil
+import struct
 import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -539,17 +540,21 @@ def site(lang, v):
         rowsE.append([n, len(cl), (" ".join(f"({s},{c})" for s, c in cl), "l"),
                       (" ".join(f"({s},{c})" for s, c in surv) if n <= last else "—", "l"), fam,
                       t03.get(n, 0) if n <= tmax else "—"])
+    # the size of the picture in this language (the two themes have the same), so the page keeps its
+    # place while the picture loads
+    png = (OUT / "ru" if lang == "ru" else OUT) / "e2_rapacious.png"
+    E2WH = 'width="%d" height="%d"' % struct.unpack(">II", png.read_bytes()[16:24])
     page(lang, "e2.html", t("Классы E² по длине и цвету", "E² classes by length and colour"), t(f"""
 <p>Каждый класс записан как (s, c): $s$ — длина слова (фильтрация Адамса), $c$ — цвет (число букв $\\mu$).
 Цвета до $n={nmax}$ — $Q$-вес Ext; поклеточно проверены прямым счётом метабиблиотеки (<a href="method.html">метод</a>). «Осталось» — после хищного правила (цвет $+1$, «low»).
 В колонке «семейство» — класс, стоящий на месте элемента Тоды ($n=4k+2$) или сэндвича ($n=4m+1$). Цвета этих классов идут 3 4 4 5 5 6 …, как сказано в лекции.</p>
-<p><img class="lt" src="e2_rapacious.png" alt="E² метабиблиотеки и хищные дифференциалы"><img class="dk" src="e2_rapacious_dark.png" alt="E² метабиблиотеки и хищные дифференциалы" loading="lazy"></p>
+<p><img class="lt" src="e2_rapacious.png" alt="E² метабиблиотеки и хищные дифференциалы" {E2WH} loading="lazy"><img class="dk" src="e2_rapacious_dark.png" alt="E² метабиблиотеки и хищные дифференциалы" {E2WH} loading="lazy"></p>
 <p class="muted">На картинке — до $n=100$; таблица ниже — до $n={nmax}$.</p>
 """, f"""
 <p>Each class is written as (s, c): $s$ is the length of the word (the Adams filtration), $c$ is the colour (the number of letters $\\mu$).
 The colours up to $n={nmax}$ are the $Q$-weight of Ext, checked cell by cell against a direct computation of the metalibrary (<a href="method.html">method</a>). “Left” means after the rapacious rule (colour $+1$, “low”).
 The column “family” gives the class standing in the place of a Toda element ($n=4k+2$) or of a sandwich ($n=4m+1$). The colours of these classes run 3 4 4 5 5 6 …, as stated in the lecture.</p>
-<p><img class="lt" src="e2_rapacious.png" alt="E² of the metalibrary and the rapacious differentials"><img class="dk" src="e2_rapacious_dark.png" alt="E² of the metalibrary and the rapacious differentials" loading="lazy"></p>
+<p><img class="lt" src="e2_rapacious.png" alt="E² of the metalibrary and the rapacious differentials" {E2WH} loading="lazy"><img class="dk" src="e2_rapacious_dark.png" alt="E² of the metalibrary and the rapacious differentials" {E2WH} loading="lazy"></p>
 <p class="muted">The picture goes up to $n=100$; the table below, up to $n={nmax}$.</p>
 """) + f"""{table(t(["n", "dim E²", "<l>классы (s, c)", "<l>осталось после правила", "семейство (s, c)", "Тода 2003"],
                    ["n", "dim E²", "<l>classes (s, c)", "<l>left after the rule", "family (s, c)", "Toda 2003"]), rowsE)}

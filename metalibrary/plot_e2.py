@@ -107,7 +107,8 @@ def main():
         ax.set_ylim(0, max(s for _, s, _ in E2) + 1)
         ax.grid(axis="x", color=C["grid"], lw=0.6)
         ax.set_title(t["title"], fontsize=14)
-        handles = [Line2D([], [], marker="o", ls="", color=cmap(c), label=str(c)) for c in range(maxc + 1)]
+        rim = dict(mec=C["rim"], mew=0.5) if theme else {}  # dark: the legend's dots get the rim of the plot's
+        handles = [Line2D([], [], marker="o", ls="", color=cmap(c), label=str(c), **rim) for c in range(maxc + 1)]
         leg1 = ax.legend(handles=handles, title=t["colour"], ncol=min(maxc + 1, 16), loc="upper left", fontsize=8,
                          title_fontsize=9, frameon=False)
         ax.add_artist(leg1)
