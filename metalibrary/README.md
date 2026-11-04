@@ -85,7 +85,7 @@ metalibrary had to be computed here.
 - `rust/`: `cargo build --release && target/release/metalib NMAX [THREADS] > data/e2_metalib.csv`.
 - `compare_sseq.py`: the comparison with sseq/ext.
 - `rapacious.py`: the rapacious rule, its variants and checks; `--list` prints the differentials.
-- `plot_e2.py`: the picture `out/7_e2_rapacious_{ru,en}.png`.
+- `plot_e2.py`: the picture `out/7_e2_rapacious_{ru,en}.png`, and `..._dark.png` for the dark theme of the site.
 - `data/e2_metalib.csv`: $`n,s,\text{colour},\#\text{words},\mathrm{rank}\,\partial,\dim E^2`$;
   `data/e2_lambda1.csv`: the same for $\Lambda(1)$ up to $\pi_{46}$;
   `data/sseq_S3_p3.csv`: the Ext from sseq up to $n=86$; `data/rapacious.json`: the outcome of the rule.
