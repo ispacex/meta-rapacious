@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Certificates of block ranks, checked and then thrown away (MATH-106): for each block, certlow
+# writes the certificate, cert/check.py (check_block, unchanged) checks it, and only its sha256
+# and the checked rank are kept. certlow is deterministic, so the file can be rebuilt and compared
+# with the hash.
+#
+#   cd metalibrary && spasm/cert_hashes.sh BLOCKS PAR
+#
+# Result: $JOB_OUT/cert_hashes.csv: n,s,colour,words,rank,bytes,sha256 -- rank is the one check.py
+# accepted. A block whose check fails is listed in $JOB_OUT/failed.txt. check.py needs about
+# 2 KB per word, so PAR blocks of up to W words need about PAR * 2 KB * W.
+set -euo pipefail
+blocks=$1 par=$2
+: "${JOB_OUT:=$PWD/out}"
+mkdir -p "$JOB_OUT/logs" "$JOB_OUT/tmp"
+: > "$JOB_OUT/failed.txt"
+source "$(dirname "$0")/cargo-env.sh"
+export CARGO_TARGET_DIR="${JOB_CACHE:-$PWD/rust}/target"
+(cd rust && cargo build --release -q --bin certlow)
+export B="$CARGO_TARGET_DIR/release" JOB_OUT
+one() {
+  set -uo pipefail
+  read -r n s c _ <<< "$1"
+  tag="${n}_${s}_${c}" d="$JOB_OUT/tmp/$tag"
+  mkdir -p "$d"
+  echo "$n $s $c" > "$d/b.txt"
+  if "$B/certlow" "$d/b.txt" "$d" 1 2> "$JOB_OUT/logs/$tag.gen" \
+     && python3 spasm/check_block.py "$d/block_$tag.txt" > "$d/ok" 2> "$JOB_OUT/logs/$tag.check"; then
+    r=$(cut -d, -f4 "$d/ok")
+    w=$(head -1 "$d/block_$tag.txt" | cut -d' ' -f6)
+    echo "$n,$s,$c,$w,$r,$(wc -c < "$d/block_$tag.txt" | tr -d ' '),$( (sha256sum 2>/dev/null || shasum -a 256) < "$d/block_$tag.txt" | cut -c1-64)" > "$JOB_OUT/logs/$tag.csv"
+  else
+    echo "$n $s $c" >> "$JOB_OUT/failed.txt"
+  fi
+  rm -rf "$d"
+}
+export -f one
+grep -v '^#' "$blocks" | grep . | xargs -P "$par" -I{} bash -c 'one "$@"' _ {} || true
+{ echo "n,s,colour,words,rank,bytes,sha256"; cat "$JOB_OUT"/logs/*.csv 2>/dev/null | sort -t, -k1,1n -k2,2n -k3,3n; } > "$JOB_OUT/cert_hashes.csv"
+echo "$(($(wc -l < "$JOB_OUT/cert_hashes.csv") - 1)) blocks checked; $(wc -l < "$JOB_OUT/failed.txt" | tr -d " ") failed"
