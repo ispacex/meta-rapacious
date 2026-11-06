@@ -100,6 +100,9 @@ metalibrary had to be computed here.
 - `data/s2_3torsion.csv`: the 3-torsion of $\pi_n(S^2)$ by Toda's 1962 table ($n\le22$, column
   `toda_rank`), the Toda elements and sandwiches (Ivanov–Mikhailov–Wu) and the statements of the
   lecture; checked against two reprints of Toda's table (Ravenel, Table A3.4, and the PKU table).
+- `spasm/`: SpaSM against `lowmem` (MATH-106; `lowmem` is far faster), `rust/src/bin/sms.rs` (a block as an SMS
+  matrix), `rust/src/bin/certlow.rs` (rank certificates of large blocks), `spasm/par_blocks.sh`
+  (blocks in parallel): [`spasm/BENCH.md`](spasm/BENCH.md).
 - `cert/`: verifiable certificates of the rule's disagreement with Toda in $\pi_{49}\text{–}\pi_{51}$,
   $\pi_{59}$, $\pi_{60}$ ([`cert/README.md`](cert/README.md)).
 
