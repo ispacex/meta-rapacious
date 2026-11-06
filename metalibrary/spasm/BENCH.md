@@ -82,6 +82,21 @@ needs about 2 GB, $5\cdot10^6$ about 10 GB, and $3\cdot10^7$ about 60 GB. The Le
 Certificates of the large blocks can be written now, but checking them needs either a checker that
 does not list the words, or that much RAM.
 
+## The open blocks of `open_blocks_part2.txt` (step 2: blocks in parallel)
+
+These are 84 blocks, $1.07\cdot10^9$ words in all, the largest of $3.0\cdot10^7$. They were computed by
+`par_blocks.sh data/open_blocks_part2.txt 2 2 lowmem` on ax42 in 1 h 39 min: two blocks at a time,
+2 threads each, 4 cores. The largest block took 7.5 min and at most 1.85 GB of pivot rows. The ranks
+are in `../data/ranks_part2.csv`.
+
+`merge_ranks.py data/ranks_part1.csv data/ranks_part2.csv` gives the exact dimension of 656 cells,
+76 more than before (`../data/e2_known.csv`). 65 of the new cells were open in `e2_colours.csv`, and
+20 of the new cells are nonzero.
+**All 656 agree with the $E^2$ recovered from the $Q$-weight (`../data/e2_qgrade.csv`), 0 disagreements**,
+which makes this an independent check of the colours from sseq on these cells. These ranks have no
+certificates yet (see the checker limit above).
+
+
 ## Reproducing
 
 ```bash
