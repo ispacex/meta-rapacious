@@ -16,7 +16,7 @@ set -euo pipefail
 blocks=$1 threads=$2
 : "${JOB_OUT:=$PWD/out}"
 mkdir -p "$JOB_OUT/logs"
-[ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
+source "$(dirname "$0")/cargo-env.sh"
 export CARGO_TARGET_DIR="${JOB_CACHE:-$PWD/rust}/target"
 (cd rust && cargo build --release -q --bin lowmem --bin sms --bin certlow)
 B="$CARGO_TARGET_DIR/release"
