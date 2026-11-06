@@ -8,7 +8,8 @@
 #   lowmem  -- rows in parallel, elimination in one thread (rust/src/bin/lowmem.rs);
 #   sms     -- the same rows written as an SMS matrix to /dev/null (the cost of the export alone);
 #   spasm-plain, spasm-flip -- `sms [--flip] | rank --modulus 3`: SpaSM's elimination (OpenMP)
-#              on the streamed matrix, columns in lowmem's order or reversed (SPASM_VARIANTS);
+#              on the streamed matrix, columns in lowmem's order or reversed (SPASM_VARIANTS),
+#              stopped after SPASM_TIMEOUT seconds (default 1800);
 #   certlow -- the rank certificate in the format of cert/check.py (written to $JOB_OUT/cert_*/,
 #              removed after the run unless KEEP_CERT=1).
 # Results: $JOB_OUT/bench.csv (tool,n,s,c,rows,cols,nnz,rank,wall_s,maxrss_mb,spasm_echelon_s)
@@ -43,12 +44,12 @@ grep -v '^#' "$blocks" | while read -r n s c _; do
   for variant in ${SPASM_VARIANTS:-plain flip}; do
     flag=; [ $variant = flip ] && flag=--flip
     set +e
-    "$B/sms" "$n" "$s" "$c" "$threads" $flag 2> /dev/null | /usr/bin/time -v "$RANK" --modulus 3 > /dev/null 2> "$JOB_OUT/logs/spasm_${variant}_$tag.err"
+    "$B/sms" "$n" "$s" "$c" "$threads" $flag 2> /dev/null | /usr/bin/time -v timeout "${SPASM_TIMEOUT:-1800}" "$RANK" --modulus 3 > /dev/null 2> "$JOB_OUT/logs/spasm_${variant}_$tag.err"
     st=$?
     set -e
     sr=$(sed -n 's/.*done in \([0-9.]*\) s rank = \([0-9]*\).*/\2/p' "$JOB_OUT/logs/spasm_${variant}_$tag.err")
     se=$(sed -n 's/.*done in \([0-9.]*\) s rank = \([0-9]*\).*/\1/p' "$JOB_OUT/logs/spasm_${variant}_$tag.err")
-    [ $st -eq 0 ] || { sr="fail($st)"; tail -5 "$JOB_OUT/logs/spasm_${variant}_$tag.err"; }
+    if [ $st -eq 124 ]; then sr="timeout"; elif [ $st -ne 0 ]; then sr="fail($st)"; tail -5 "$JOB_OUT/logs/spasm_${variant}_$tag.err"; fi
     echo "spasm-$variant,$n,$s,$c,$rows,$cols,$nnz,$sr,$(wall "$JOB_OUT/logs/spasm_${variant}_$tag.err"),$(rss "$JOB_OUT/logs/spasm_${variant}_$tag.err"),$se" >> "$csv"
     tail -1 "$csv"
     [ "$sr" = "$lr" ] && echo "ranks agree: $lr" || echo "RANKS DIFFER: lowmem $lr, spasm-$variant $sr"
