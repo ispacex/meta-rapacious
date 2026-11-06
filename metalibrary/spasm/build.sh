@@ -28,6 +28,8 @@ if [ "$(git rev-parse HEAD)" != "$SPASM_COMMIT" ]; then
   git fetch -q origin && git checkout -q "$SPASM_COMMIT" && rm -rf build
 fi
 if [ ! -x build/tools/rank ]; then
+  # the one local change: src/CMakeLists.txt has -Werror, and newer GCC warns (format-truncation)
+  sed -i 's/^add_compile_options(-Werror)$/# -Werror dropped by metalibrary\/spasm\/build.sh/' src/CMakeLists.txt
   cmake -S . -B build -DCMAKE_PREFIX_PATH="$ENV" -DCMAKE_INSTALL_RPATH="$ENV/lib" \
     -DCMAKE_BUILD_RPATH="$ENV/lib" -DBUILD_TESTING=OFF > build.log 2>&1 || { tail -30 build.log; exit 1; }
   cmake --build build -j "${SPASM_JOBS:-2}" >> build.log 2>&1 || { tail -30 build.log; exit 1; }
