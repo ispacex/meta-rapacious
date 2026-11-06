@@ -7,7 +7,9 @@
 # BLOCKS: lines "n s c [words]". For each block, three runs, each with THREADS threads:
 #   lowmem  -- rows in parallel, elimination in one thread (rust/src/bin/lowmem.rs);
 #   sms     -- the same rows written as an SMS matrix to /dev/null (the cost of the export alone);
-#   spasm   -- `sms | rank --modulus 3`: SpaSM's elimination (OpenMP) on the streamed matrix.
+#   spasm   -- `sms | rank --modulus 3`: SpaSM's elimination (OpenMP) on the streamed matrix;
+#   certlow -- the rank certificate in the format of cert/check.py (written to $JOB_OUT/cert_*/,
+#              removed after the run unless KEEP_CERT=1).
 # Results: $JOB_OUT/bench.csv (tool,n,s,c,rows,cols,nnz,rank,wall_s,maxrss_mb,spasm_echelon_s)
 # and the raw stderr of every run in $JOB_OUT/logs/.
 set -euo pipefail
@@ -16,7 +18,7 @@ blocks=$1 threads=$2
 mkdir -p "$JOB_OUT/logs"
 [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
 export CARGO_TARGET_DIR="${JOB_CACHE:-$PWD/rust}/target"
-(cd rust && cargo build --release -q --bin lowmem --bin sms)
+(cd rust && cargo build --release -q --bin lowmem --bin sms --bin certlow)
 B="$CARGO_TARGET_DIR/release"
 SPASM_JOBS=$threads spasm/build.sh
 RANK="${SPASM_HOME:-${JOB_CACHE:-$PWD}/spasm}/src/build/tools/rank"
@@ -47,4 +49,9 @@ grep -v '^#' "$blocks" | while read -r n s c _; do
   echo "spasm,$n,$s,$c,$rows,$cols,$nnz,$sr,$(wall "$JOB_OUT/logs/spasm_$tag.err"),$(rss "$JOB_OUT/logs/spasm_$tag.err"),$se" >> "$csv"
   tail -3 "$csv"
   [ "$sr" = "$lr" ] && echo "ranks agree: $lr" || echo "RANKS DIFFER: lowmem $lr, spasm $sr"
+  /usr/bin/time -v "$B/certlow" "$JOB_OUT/logs/one.txt" "$JOB_OUT/cert_$tag" "$threads" 2> "$JOB_OUT/logs/certlow_$tag.err"
+  cr=$(sed -n 's/.*, rank \([0-9]*\), .*/\1/p' "$JOB_OUT/logs/certlow_$tag.err")
+  echo "certlow,$n,$s,$c,$rows,$cols,$nnz,$cr,$(wall "$JOB_OUT/logs/certlow_$tag.err"),$(rss "$JOB_OUT/logs/certlow_$tag.err")," >> "$csv"
+  grep '^block' "$JOB_OUT/logs/certlow_$tag.err"; du -sh "$JOB_OUT/cert_$tag"
+  [ "${KEEP_CERT:-0}" = 1 ] || rm -rf "$JOB_OUT/cert_$tag"
 done
