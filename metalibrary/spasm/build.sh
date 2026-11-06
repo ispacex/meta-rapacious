@@ -2,12 +2,12 @@
 # Build SpaSM (https://github.com/cbouilla/spasm) at a pinned commit, with Givaro and FFLAS-FFPACK
 # from conda-forge (micromamba; no root needed). Idempotent: an existing build is reused.
 #
-#   SPASM_HOME=... metalibrary/spasm/build.sh     # default $JOB_CACHE/spasm (or ./spasm-build)
+#   SPASM_HOME=... metalibrary/spasm/build.sh     # default $JOB_CACHE/spasm, or ~/.cache/metalib/spasm
 #
 # The tools end up in $SPASM_HOME/src/build/tools (rank, echelonize, kernel, check_cert, ...).
 set -euo pipefail
 SPASM_COMMIT=09c40943f1d4b754f89fb97fc9ddf2b8e53e967e   # master of 2024-11-04 (v1.3 + argp patch)
-SPASM_HOME=${SPASM_HOME:-${JOB_CACHE:-$PWD}/spasm}
+SPASM_HOME=${SPASM_HOME:-${JOB_CACHE:-$HOME/.cache/metalib}/spasm}
 mkdir -p "$SPASM_HOME/bin"
 export PATH="$SPASM_HOME/bin:$PATH"
 if ! command -v micromamba > /dev/null; then
@@ -25,6 +25,7 @@ if [ ! -d "$SPASM_HOME/src/.git" ]; then
 fi
 cd "$SPASM_HOME/src"
 if [ "$(git rev-parse HEAD)" != "$SPASM_COMMIT" ]; then
+  git checkout -q -- src/CMakeLists.txt   # drop our -Werror edit before moving the pin
   git fetch -q origin && git checkout -q "$SPASM_COMMIT" && rm -rf build
 fi
 if [ ! -x build/tools/rank ]; then

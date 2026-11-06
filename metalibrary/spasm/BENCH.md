@@ -5,10 +5,10 @@ faster than `lowmem` on the blocks of the differential? `lowmem` computes rows i
 eliminates in one thread. If SpaSM were faster, it would be used for the large open blocks.
 
 **Answer: no.** On every block SpaSM gives the same rank where it finishes, but it is 60–80 times
-slower than `lowmem` on a block of $3\cdot10^5$ words, and does not finish in 10–20 minutes on blocks of
+slower than `lowmem` on a block of $3\cdot10^5$ words (60–84×), and does not finish in 10–20 minutes on blocks of
 $10^6$–$3\cdot10^7$ words (stopped after 10–20 min), where `lowmem` takes 4 s, 33–41 s and 2.5–4.6 min.
 `lowmem`'s elimination is not the bottleneck: it needs 0.01–1.8 GB, and most of its time goes into
-computing the rows. The same rows streamed to `/dev/null` (`sms`) take almost as long as `lowmem`.
+computing the rows. The same rows streamed to `/dev/null` as text (`sms`) take 67–80% of `lowmem`'s time on the large blocks.
 
 ## Setup
 
@@ -18,7 +18,9 @@ computing the rows. The same rows streamed to `/dev/null` (`sms`) take almost as
 - `../rust/src/bin/sms.rs` writes a block as an SMS matrix. Rows are source words and columns are
   target words, both in `lowmem`'s lexicographic order. The matrix is streamed into `rank --modulus 3`
   and never written to disk. `--flip` reverses the columns, so that SpaSM's structural pivot (the
-  leftmost entry) is `lowmem`'s pivot (the largest word).
+  leftmost entry) is `lowmem`'s pivot (the largest word). SpaSM's `rank` transposes a matrix with fewer
+  rows than columns (it has `--no-transpose`, not used here), so 72 13 6 and 81 15 9 were eliminated
+  as their transposes; flip was only tried on 61 12 6.
 - `bench.sh BLOCKS THREADS` runs the following on each block:
   - `lowmem`;
   - `sms > /dev/null`;
@@ -31,7 +33,8 @@ computing the rows. The same rows streamed to `/dev/null` (`sms`) take almost as
   ax42 was shared with other load, so its times are only rough; on a quiet run `lowmem` took 61 s on
   76 17 6.
 - Time is wall clock, memory is maximum RSS (GNU time). For SpaSM, the last column is SpaSM's own
-  echelonization time; the rest is reading the matrix.
+  echelonization time; the rest is generating, streaming and parsing the matrix (the generator `sms`
+  and SpaSM run at the same time, each with THREADS threads).
 
 ## Results
 
@@ -44,7 +47,7 @@ computing the rows. The same rows streamed to `/dev/null` (`sms`) take almost as
 | 76 17 6 | 20 940 920 × 9 731 904 | 134.7 M | 7 256 976 | 158.8 s, 1.24 GB (61 s on a quieter run) | 92.1 s, 1.35 GB | 106.4 s | plain: > 900 s (stopped), 2.9 GB; still in the first pivot search (4.4 M of 20.9 M rows) |
 | 81 15 9 | 29 718 040 × 37 455 704 | 335.5 M | 18 069 830 | 276.5 s, 2.67 GB | 478.5 s, 2.96 GB | 193.6 s | plain: > 900 s (stopped), 7.0 GB |
 
-The `lowmem` ranks of 61 12 6 and 66 13 4 equal those of `../data/ranks_part1.csv`. SpaSM's rank
+The `lowmem` ranks of 61 12 6, 66 13 4 and 84 20 13 equal those of `../data/ranks_part1.csv`. SpaSM's rank
 equals `lowmem`'s wherever SpaSM finished.
 
 **Why SpaSM loses here.** Here is SpaSM's log on 61 12 6.
@@ -59,7 +62,8 @@ fill (0.01–1.8 GB of pivot rows). Flipping the columns for SpaSM does not help
 
 **GPU (step 3 of the plan): not needed.** There is no dense tail. SpaSM's dense remainder on
 61 12 6 has rank 0, and `lowmem`'s pivot rows stay sparse: 1.78 GB on the block of $3\cdot10^7$ words.
-Nothing here is a dense $\mathbb F_3$ matrix with tens of thousands of columns.
+Nothing here is a dense $\mathbb F_3$ matrix with tens of thousands of columns. This is an inference
+from one SpaSM log and from `lowmem`'s memory, not a measurement on every block.
 
 ## What to use instead
 
@@ -67,14 +71,14 @@ Nothing here is a dense $\mathbb F_3$ matrix with tens of thousands of columns.
   step 2 of the plan).
 - **Certificates.** `certlow` (`../rust/src/bin/certlow.rs`). It writes the same file as `cert`,
   which `../cert/check.py` and the Lean project check: byte-identical on 61 12 6 and 81 19 1, and
-  `check.py` accepts 81 19 1. Its memory is that of `lowmem`, and its time is about the same.
+  `check.py` accepts 81 19 1. Its memory is that of `lowmem`, and its time within about 1–1.7 times `lowmem`'s.
 
-  The certificate files are large: about 45–54 bytes per source word uncompressed (16 MB for
+  The certificate files are large: about 45–58 bytes per source word uncompressed (16 MB for
   61 12 6, 239 MB for 84 20 13, 294 MB for 72 13 6, 944 MB for 76 17 6).
 
 **The limit is the checker, not the generator.** `check.py` lists every word of a block as Python
-tuples, about 2 KB per word: 431 MB on the $2\cdot10^5$-word block 81 19 1. A block of $10^6$ words
-needs about 2 GB, $5\cdot10^6$ about 10 GB, and $3\cdot10^7$ about 60 GB. The Lean check needs more.
+tuples and caches normal forms; its total memory is about 2 KB per word: 431 MB on the $2\cdot10^5$-word block 81 19 1. A block of $10^6$ words
+needs about 2 GB, $5\cdot10^6$ about 10 GB, and $3\cdot10^7$ about 60 GB. The Lean check (which uses 7.7 GB on π₅₉–π₆₀ already) would likely need more.
 Certificates of the large blocks can be written now, but checking them needs either a checker that
 does not list the words, or that much RAM.
 

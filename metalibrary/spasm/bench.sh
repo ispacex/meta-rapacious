@@ -8,7 +8,8 @@
 #   lowmem  -- rows in parallel, elimination in one thread (rust/src/bin/lowmem.rs);
 #   sms     -- the same rows written as an SMS matrix to /dev/null (the cost of the export alone);
 #   spasm-plain, spasm-flip -- `sms [--flip] | rank --modulus 3`: SpaSM's elimination (OpenMP)
-#              on the streamed matrix, columns in lowmem's order or reversed (SPASM_VARIANTS),
+#              on the streamed matrix, columns in lowmem's order or reversed (SPASM_VARIANTS);
+#              note that `rank` transposes a matrix with fewer rows than columns,
 #              stopped after SPASM_TIMEOUT seconds (default 1800);
 #   certlow -- the rank certificate in the format of cert/check.py (written to $JOB_OUT/cert_*/,
 #              removed after the run unless KEEP_CERT=1).
@@ -23,7 +24,7 @@ export CARGO_TARGET_DIR="${JOB_CACHE:-$PWD/rust}/target"
 (cd rust && cargo build --release -q --bin lowmem --bin sms --bin certlow)
 B="$CARGO_TARGET_DIR/release"
 SPASM_JOBS=$threads spasm/build.sh
-RANK="${SPASM_HOME:-${JOB_CACHE:-$PWD}/spasm}/src/build/tools/rank"
+RANK="${SPASM_HOME:-${JOB_CACHE:-$HOME/.cache/metalib}/spasm}/src/build/tools/rank"
 export OMP_NUM_THREADS=$threads
 csv="$JOB_OUT/bench.csv"
 [ -f "$csv" ] || echo "tool,n,s,c,rows,cols,nnz,rank,wall_s,maxrss_mb,spasm_echelon_s" > "$csv"
