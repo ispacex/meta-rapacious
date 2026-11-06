@@ -115,7 +115,8 @@ With this, all 846 blocks of `open_blocks.txt` have ranks.
 open in `e2_colours.csv`: 13 are nonzero and 15 are zero. The other 4 new cells that have a row in
 `e2_colours.csv` were already determined (all nonzero), and 26 had no row there (already known to be
 zero; all 26 come out zero). **No open cell of `e2_colours.csv` is left. All 714 cells agree with
-`e2_qgrade.csv`.**
+`e2_qgrade.csv`.** Like part2, these ranks have no certificates: every block is far above the size
+the current `check.py` can hold in memory.
 
 ## Reproducing
 

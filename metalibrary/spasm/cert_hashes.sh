@@ -7,13 +7,15 @@
 #   cd metalibrary && spasm/cert_hashes.sh BLOCKS PAR
 #
 # Result: $JOB_OUT/cert_hashes.csv: n,s,colour,words,rank,bytes,sha256 -- rank is the one check.py
-# accepted. A block whose check fails is listed in $JOB_OUT/failed.txt. check.py needs about
+# accepted; a block certificate proves rank >= that number (the exact rank also needs an upper
+# bound, which cert/ gets from cell certificates). A block whose check fails is listed in $JOB_OUT/failed.txt. check.py needs about
 # 2 KB per word, so PAR blocks of up to W words need about PAR * 2 KB * W.
 set -euo pipefail
 blocks=$1 par=$2
 : "${JOB_OUT:=$PWD/out}"
 mkdir -p "$JOB_OUT/logs" "$JOB_OUT/tmp"
 : > "$JOB_OUT/failed.txt"
+rm -f "$JOB_OUT"/logs/*.csv
 source "$(dirname "$0")/cargo-env.sh"
 export CARGO_TARGET_DIR="${JOB_CACHE:-$PWD/rust}/target"
 (cd rust && cargo build --release -q --bin certlow)
@@ -25,7 +27,7 @@ one() {
   mkdir -p "$d"
   echo "$n $s $c" > "$d/b.txt"
   if "$B/certlow" "$d/b.txt" "$d" 1 2> "$JOB_OUT/logs/$tag.gen" \
-     && python3 spasm/check_block.py "$d/block_$tag.txt" > "$d/ok" 2> "$JOB_OUT/logs/$tag.check"; then
+     && python3 -I spasm/check_block.py "$d/block_$tag.txt" > "$d/ok" 2> "$JOB_OUT/logs/$tag.check"; then
     r=$(cut -d, -f4 "$d/ok")
     w=$(head -1 "$d/block_$tag.txt" | cut -d' ' -f6)
     echo "$n,$s,$c,$w,$r,$(wc -c < "$d/block_$tag.txt" | tr -d ' '),$( (sha256sum 2>/dev/null || shasum -a 256) < "$d/block_$tag.txt" | cut -c1-64)" > "$JOB_OUT/logs/$tag.csv"
@@ -37,4 +39,7 @@ one() {
 export -f one
 grep -v '^#' "$blocks" | grep . | xargs -P "$par" -I{} bash -c 'one "$@"' _ {} || true
 { echo "n,s,colour,words,rank,bytes,sha256"; cat "$JOB_OUT"/logs/*.csv 2>/dev/null | sort -t, -k1,1n -k2,2n -k3,3n; } > "$JOB_OUT/cert_hashes.csv"
-echo "$(($(wc -l < "$JOB_OUT/cert_hashes.csv") - 1)) blocks checked; $(wc -l < "$JOB_OUT/failed.txt" | tr -d " ") failed"
+ok=$(($(wc -l < "$JOB_OUT/cert_hashes.csv") - 1)) bad=$(wc -l < "$JOB_OUT/failed.txt" | tr -d " ")
+total=$(grep -v '^#' "$blocks" | grep -c .)
+echo "$ok blocks checked; $bad failed; $((total - ok - bad)) missing (of $total)"
+[ $((ok + bad)) -eq "$total" ]
