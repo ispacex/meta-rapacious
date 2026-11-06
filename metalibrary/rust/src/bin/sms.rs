@@ -1,10 +1,12 @@
 //! A block of the differential as a sparse matrix over F_3 in SMS format (SpaSM, LinBox), for
 //! benchmarking other elimination programs against `lowmem` (MATH-106):
 //!
-//!     sms N S C [THREADS] > block.sms        # or: sms N S C | spasm/rank
+//!     sms N S C [THREADS] [--flip] > block.sms        # or: sms N S C | spasm/rank
 //!
 //! The block is d: (n,s,c) -> (n-1,s+1,c). Row i (1-based) is d of the (i-1)-th source word in the
 //! lexicographic order of `lowmem`, column j is the (j-1)-th target word; entries are 1 or 2.
+//! With --flip the columns are reversed (column j is target word T-j), so that the leftmost entry
+//! of a row -- the pivot SpaSM's structural search prefers -- is lowmem's pivot, the largest word.
 //! Rows are computed in parallel a chunk at a time, as in `lowmem`, and streamed in order, so the
 //! matrix is never held in memory. stderr: the size, the number of nonzeros and the time.
 
@@ -19,9 +21,11 @@ use std::io::Write;
 use std::time::Instant;
 
 fn main() {
-    let a: Vec<String> = std::env::args().collect();
+    let mut a: Vec<String> = std::env::args().collect();
+    let flip = a.iter().any(|x| x == "--flip");
+    a.retain(|x| x != "--flip");
     if a.len() < 4 {
-        eprintln!("usage: sms N S C [THREADS] > block.sms");
+        eprintln!("usage: sms N S C [THREADS] [--flip] > block.sms");
         std::process::exit(2);
     }
     let (n, s, c): (i64, usize, usize) = (a[1].parse().unwrap(), a[2].parse().unwrap(), a[3].parse().unwrap());
@@ -47,7 +51,8 @@ fn main() {
                 let row = block_row(&cs, &ct, stem, s, c, i);
                 let mut b = Vec::with_capacity(row.len() * 16);
                 for (j, v) in &row {
-                    writeln!(b, "{} {} {}", i + 1, j + 1, v).unwrap();
+                    let col = if flip { ntgt - *j as u64 } else { *j as u64 + 1 };
+                    writeln!(b, "{} {} {}", i + 1, col, v).unwrap();
                 }
                 (row.len(), b)
             })

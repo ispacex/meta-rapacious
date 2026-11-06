@@ -7,7 +7,8 @@
 # BLOCKS: lines "n s c [words]". For each block, three runs, each with THREADS threads:
 #   lowmem  -- rows in parallel, elimination in one thread (rust/src/bin/lowmem.rs);
 #   sms     -- the same rows written as an SMS matrix to /dev/null (the cost of the export alone);
-#   spasm   -- `sms | rank --modulus 3`: SpaSM's elimination (OpenMP) on the streamed matrix;
+#   spasm-plain, spasm-flip -- `sms [--flip] | rank --modulus 3`: SpaSM's elimination (OpenMP)
+#              on the streamed matrix, columns in lowmem's order or reversed (SPASM_VARIANTS);
 #   certlow -- the rank certificate in the format of cert/check.py (written to $JOB_OUT/cert_*/,
 #              removed after the run unless KEEP_CERT=1).
 # Results: $JOB_OUT/bench.csv (tool,n,s,c,rows,cols,nnz,rank,wall_s,maxrss_mb,spasm_echelon_s)
@@ -39,16 +40,19 @@ grep -v '^#' "$blocks" | while read -r n s c _; do
   read -r rows cols nnz < <(sed -n 's/^sms .*: \([0-9]*\) x \([0-9]*\), \([0-9]*\) nonzeros.*/\1 \2 \3/p' "$JOB_OUT/logs/sms_$tag.err")
   echo "lowmem,$n,$s,$c,$rows,$cols,$nnz,$lr,$(wall "$JOB_OUT/logs/lowmem_$tag.err"),$(rss "$JOB_OUT/logs/lowmem_$tag.err")," >> "$csv"
   echo "sms,$n,$s,$c,$rows,$cols,$nnz,,$(wall "$JOB_OUT/logs/sms_$tag.err"),$(rss "$JOB_OUT/logs/sms_$tag.err")," >> "$csv"
-  set +e
-  "$B/sms" "$n" "$s" "$c" "$threads" 2> /dev/null | /usr/bin/time -v "$RANK" --modulus 3 > /dev/null 2> "$JOB_OUT/logs/spasm_$tag.err"
-  st=$?
-  set -e
-  sr=$(sed -n 's/.*done in \([0-9.]*\) s rank = \([0-9]*\).*/\2/p' "$JOB_OUT/logs/spasm_$tag.err")
-  se=$(sed -n 's/.*done in \([0-9.]*\) s rank = \([0-9]*\).*/\1/p' "$JOB_OUT/logs/spasm_$tag.err")
-  [ $st -eq 0 ] || { sr="fail($st)"; tail -5 "$JOB_OUT/logs/spasm_$tag.err"; }
-  echo "spasm,$n,$s,$c,$rows,$cols,$nnz,$sr,$(wall "$JOB_OUT/logs/spasm_$tag.err"),$(rss "$JOB_OUT/logs/spasm_$tag.err"),$se" >> "$csv"
-  tail -3 "$csv"
-  [ "$sr" = "$lr" ] && echo "ranks agree: $lr" || echo "RANKS DIFFER: lowmem $lr, spasm $sr"
+  for variant in ${SPASM_VARIANTS:-plain flip}; do
+    flag=; [ $variant = flip ] && flag=--flip
+    set +e
+    "$B/sms" "$n" "$s" "$c" "$threads" $flag 2> /dev/null | /usr/bin/time -v "$RANK" --modulus 3 > /dev/null 2> "$JOB_OUT/logs/spasm_${variant}_$tag.err"
+    st=$?
+    set -e
+    sr=$(sed -n 's/.*done in \([0-9.]*\) s rank = \([0-9]*\).*/\2/p' "$JOB_OUT/logs/spasm_${variant}_$tag.err")
+    se=$(sed -n 's/.*done in \([0-9.]*\) s rank = \([0-9]*\).*/\1/p' "$JOB_OUT/logs/spasm_${variant}_$tag.err")
+    [ $st -eq 0 ] || { sr="fail($st)"; tail -5 "$JOB_OUT/logs/spasm_${variant}_$tag.err"; }
+    echo "spasm-$variant,$n,$s,$c,$rows,$cols,$nnz,$sr,$(wall "$JOB_OUT/logs/spasm_${variant}_$tag.err"),$(rss "$JOB_OUT/logs/spasm_${variant}_$tag.err"),$se" >> "$csv"
+    tail -1 "$csv"
+    [ "$sr" = "$lr" ] && echo "ranks agree: $lr" || echo "RANKS DIFFER: lowmem $lr, spasm-$variant $sr"
+  done
   /usr/bin/time -v "$B/certlow" "$JOB_OUT/logs/one.txt" "$JOB_OUT/cert_$tag" "$threads" 2> "$JOB_OUT/logs/certlow_$tag.err"
   cr=$(sed -n 's/.*, rank \([0-9]*\), .*/\1/p' "$JOB_OUT/logs/certlow_$tag.err")
   echo "certlow,$n,$s,$c,$rows,$cols,$nnz,$cr,$(wall "$JOB_OUT/logs/certlow_$tag.err"),$(rss "$JOB_OUT/logs/certlow_$tag.err")," >> "$csv"
