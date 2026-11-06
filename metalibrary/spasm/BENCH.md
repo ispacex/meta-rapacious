@@ -93,7 +93,7 @@ are in `../data/ranks_part2.csv`.
 76 more than before (`../data/e2_known.csv`). Of the 76 new cells, 21 were open in `e2_colours.csv`;
 the new ranks settle 9 of them as nonzero and 12 as zero. The other 55 were already determined
 (11 nonzero, 44 zero), and the ranks agree with them.
-**All 656 agree with the $E^2$ recovered from the $Q$-weight (`../data/e2_qgrade.csv`), 0 disagreements**,
+**All 656 agree with the $E^2$ recovered from the $Q$-weight (`../data/e2_qgrade.csv`), 0 disagreements**.
 Only 230 of these cells have a row in `e2_qgrade.csv` (the rest are zero there and here), so the check
 has substance on the 21 open cells and on the nonzero ones. These ranks have no
 certificates yet (see the checker limit above).
