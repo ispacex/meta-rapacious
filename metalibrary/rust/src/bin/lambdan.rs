@@ -7,7 +7,7 @@
 //! the metalibrary) the complex is the reduced one: words without mu_0 that end with a lambda.
 //! For m = 1 its homology equals H(Lambda(1)) and the Ext of sseq except the tower over pi_3
 //! (README, items 3-4); for m > 1 the same is not assumed but checked: the program panics if d
-//! leaves the reduced words, and toda2003/check.py compares the result with sseq/ext cell by cell.
+//! leaves the reduced words, and toda03/check.py compares the result with sseq/ext cell by cell.
 //! Blocks (stem, s, colour) are independent (d keeps the colour = number of mu's).
 
 #[path = "../algebra.rs"]

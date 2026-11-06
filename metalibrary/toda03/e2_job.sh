@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # The unstable Adams E_2 of the odd spheres at p = 3, two ways, for the check of Toda's 2003
-# table (check.py, MATH-442). A tm job, run from the repository root:
+# table (toda03/check.py, MATH-442). A tm job, run from the repository root:
 #
-#     metalibrary/toda2003/e2_job.sh          # writes $JOB_OUT/sseq_S<n>.csv and lambda_m<m>.csv
+#     metalibrary/toda03/e2_job.sh          # writes $JOB_OUT/sseq_S<n>.csv and lambda_m<m>.csv
 #
 #   sseq_S<n>.csv  sseq/ext (JoeyBF/sseq at SSEQ_COMMIT), resolve_unstable of the module S_<n>[3]
 #                  (example ../sseq_unstable_dims.rs): lines n,s,dim, n = t - s, odd n <= NMAX,

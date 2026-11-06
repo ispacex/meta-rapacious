@@ -1,0 +1,7 @@
+# p. 51 (PDF 58), Theorem 5.2 (2) Removable short range unstable elements; no arrows in the source
+31 | u | 4!:AB^2 | 6!:b^2
+31 | m | 5:*<~*=*
+31 | l | 6!:B^2 | 10!:ab
+34 | u | 2!:B^3 | 6!:ab^2
+34 | m | 3:*=*<~*
+34 | l | 6!:AB^2 | 8!:b^2
