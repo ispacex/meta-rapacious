@@ -1,0 +1,3 @@
+# MATH-106 benchmark, large (open_blocks_part2.txt)
+76 17 6 20940920
+81 15 9 29718040
