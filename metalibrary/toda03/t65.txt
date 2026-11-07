@@ -33,6 +33,8 @@
 72 | m | 15:*=*=*=*=*
 73 | m | 13:*=*=*=*=*=*=*=*=*=*
 73 | m | 5:* | 7:*=* | 13:* | 15:* | 17:* | 19:*=* | 23:*
+# k = 74 and 75: the source prints one more summand of these chains under the header "stable"
+# (14 dots for beta_5, 18 circles for mu); the tail continues the chain, so the groups are the same.
 74 | m | 13:*=*=*=*=*=*=*=*=*=*=*=*=*=<\beta_5>
 74 | m | 15:*=* | 19:* | 27:*
 75 | m | 3:*->o=o=o=o=o=o=o=o=o=o=o=o=o=o=o=o=o=<\mu>

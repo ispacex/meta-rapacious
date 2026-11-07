@@ -26,3 +26,4 @@
 55 | u | 16!:AB^2 | 18!:b^2
 55 | m | 17:*=*<~*
 55 | l | 18!:B^2 | 22!:ab
+55 | r | \text{[sic: so printed; the table of 5.6 and the rows } k=43,45 \text{ suggest } \bullet\hookleftarrow\bullet=\bullet\text{]}

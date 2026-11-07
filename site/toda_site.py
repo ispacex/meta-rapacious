@@ -111,8 +111,8 @@ def write_csv(path):
 CHECK_NAMES = {
     "A": ("Столбец $S^3$: новое прочтение против прежнего (выверенного 15.10.2026)",
           "The $S^3$ column: the new reading against the earlier one (checked on 15.10.2026)"),
-    "B": ("Стабильная область ($k\\le2n-2$) и столбец «стабильно»: стабильные стемы — im $J$ и таблица A3.2 Равенеля",
-          "The stable range ($k\\le2n-2$) and the column “stable”: the stable stems, im $J$ and Ravenel's Table A3.2"),
+    "B": ("Стабильная область ($k\\le2n-1$) и столбец «стабильно»: стабильные стемы — im $J$ и таблица A3.2 Равенеля",
+          "The stable range ($k\\le2n-1$) and the column “stable”: the stable stems, im $J$ and Ravenel's Table A3.2"),
     "C": ("Тода 1962 (таблица A3.4 Равенеля), $n\\le21$, $k\\le19$: 3-часть, слагаемое за слагаемым",
           "Toda 1962 (Ravenel's Table A3.4), $n\\le21$, $k\\le19$: the 3-part, summand by summand"),
     "D": ("Нестабильный $E_2$ Адамса (sseq/ext и $H(\\Lambda(m))$)",
@@ -131,6 +131,8 @@ def checks_html(lang, res, e2_info):
             name += " " + e2_info
         probs = "<br>".join(html.escape(p) for p in v["problems"]) or t("расхождений нет", "no disagreement")
         cl = "bad" if v["problems"] else "ok"
+        if not v["checked"]:
+            probs, cl = t("не запускалась", "not run"), "amb"
         rows.append(f"<tr><td>{c}</td><td class=l>{name}</td><td>{v['checked']}</td><td class='l {cl}'>{probs}</td></tr>")
     head = t("<tr><th></th><th class=l>Проверка</th><th>клеток</th><th class=l>Результат</th></tr>",
              "<tr><th></th><th class=l>Check</th><th>cells</th><th class=l>Result</th></tr>")
@@ -201,12 +203,12 @@ def s5_page(lang):
     intro = t("""<div class="box"><p>H. Toda, <i>Unstable 3-primary Homotopy Groups of Spheres</i>, Econoinformatics <b>29</b> (2003), §5 «Old Table of 3-primary Groups»,
 печатные страницы 42–61 (PDF 49–68 скана <a href="https://www.sas.rochester.edu/mth/sites/doug-ravenel/otherpapers/Toda03-ocr.pdf">Toda03-ocr.pdf</a>).
 Переписано по картинкам страниц, текст английский, как в оригинале; номера страниц — в квадратных скобках.
-Опечатки оригинала сохранены и помечены [sic]. В скане страница с текстом «(3) Let $\\xi=\\alpha_1(7)\\circ\\varphi(10)$ …» стоит дважды, с номерами 58 и 59 (PDF 65 и 66); она дана один раз.</p>
+Опечатки оригинала сохранены и помечены [sic]. В скане страница с текстом «(3) Let $\\xi=\\alpha_1(7)\\circ\\varphi(10)$ …» напечатана дважды (два оттиска с номерами 58 и 59, PDF 65 и 66; математика одна и та же); дана один раз, по PDF 65.</p>
 <p>Диаграммы — в записи Тоды: столбцы — нечётные сферы $S^n$, между ними — $E^2$; над строкой — образы $H$ (стрелка $\\nwarrow$ от точки), под строкой — прообразы $P$ (стрелка $\\nwarrow$ к точке); где Тода стрелки опускает, их нет и здесь. Обозначения — в §5.2 ниже и на странице <a href="toda2003.html">таблицы</a>.</p></div>""",
               """<div class="box"><p>H. Toda, <i>Unstable 3-primary Homotopy Groups of Spheres</i>, Econoinformatics <b>29</b> (2003), §5 “Old Table of 3-primary Groups”,
 printed pages 42–61 (PDF 49–68 of the scan <a href="https://www.sas.rochester.edu/mth/sites/doug-ravenel/otherpapers/Toda03-ocr.pdf">Toda03-ocr.pdf</a>).
 Copied from the page images; page numbers in square brackets.
-Misprints of the original are kept and marked [sic]. In the scan the page with the text “(3) Let $\\xi=\\alpha_1(7)\\circ\\varphi(10)$ …” occurs twice, numbered 58 and 59 (PDF 65 and 66); it is given once.</p>
+Misprints of the original are kept and marked [sic]. In the scan the page with the text “(3) Let $\\xi=\\alpha_1(7)\\circ\\varphi(10)$ …” is printed twice (two printings numbered 58 and 59, PDF 65 and 66, with the same mathematics); it is given once, after PDF 65.</p>
 <p>The diagrams are in Toda's notation: the columns are the odd spheres $S^n$, with $E^2$ between them; above a row the images under $H$ (the arrow $\\nwarrow$ from the dot), below it the preimages under $P$ (the arrow $\\nwarrow$ to the dot); where Toda leaves the arrows out, they are left out here too. The notation is in §5.2 below and on the page of the <a href="toda2003.html">table</a>.</p></div>""")
     return intro + s5_body()
 

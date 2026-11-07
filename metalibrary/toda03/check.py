@@ -8,8 +8,9 @@ MATH-442. Every check is run on every cell it applies to; the result is a list o
 
   A. our S^3 column (toda2003.OLD / NEW_MOD_A, read 2026-10-15 and checked then) = the S^3
      column of the new transcription;
-  B. the stable range: in the 3-local double-suspension range k <= 2n-2 (E^2 is onto there and
-     one-to-one below it: the fibre of S^{2m-1} -> Omega^2 S^{2m+1} is (2pm-3)-connected), and
+  B. the stable range: in the 3-local double-suspension range k <= 2n-1 (the fibre of
+     E^2: S^{2m-1} -> Omega^2 S^{2m+1} has its bottom cell in dimension 2pm-3, so with n = 2m-1
+     E^2 is an isomorphism for k <= 2n-1 and onto at k = 2n), and
      in the column "stable", the group is the stable stem: im J (Z/3^{v_3(r)+1} in k = 4r-1)
      plus Ravenel's Table A3.2 (green book, 3rd digital ed., "3-Primary Stable Homotopy Excluding
      im J"); section 6.5 is mod A, so there only A3.2;
@@ -22,7 +23,9 @@ MATH-442. Every check is run on every cell it applies to; the result is a list o
      must agree where both ran;
   E. Toda against Toda: the groups mod A of the computing diagrams of sections 5.2-5.5
      (Theorems 5.1-5.4) against the table of section 5.6 (whole groups): the difference must be
-     the alpha families, i.e. zero in the stems k = 0, 1 mod 4; and the spheres of origin
+     the alpha families, i.e. zero in the stems k = 0, 1 mod 4 (an assumption on what A holds:
+     alpha_t, alpha'_3s, alpha''_9t lie in the stems 4t-1, their unstable companions and the
+     products of alpha elements in stems = 2 mod 4; section 5 does not define A explicitly); and the spheres of origin
      u(.) of (5.4.2)-(5.4.3) against the chains of the table.
 """
 import collections
@@ -147,14 +150,14 @@ def run(e2_dir=None):
         got = sorted(o for o, _ in st56.get(k, []))
         note("B", got == want, f"5.6 k={k} stable: table {got}, stable stem {want}")
         for n in range(3, T.T56_NMAX + 1, 2):
-            if k <= 2 * n - 2:
+            if k <= 2 * n - 1:
                 note("B", g56.get((k, n), []) == want, f"5.6 k={k} n={n}: {g56.get((k, n), [])} vs {want}")
     for k in range(56, 80):
         want = stable(k, mod_a=True)
         got = sorted(o for o, _ in st65.get(k, []))
         note("B", got == want, f"6.5 k={k} stable: table {got}, A3.2 {want}")
         for n in range(3, T.T65_NMAX + 1, 2):
-            if k <= 2 * n - 2:
+            if k <= 2 * n - 1:
                 note("B", g65.get((k, n), []) == want, f"6.5 k={k} n={n}: {g65.get((k, n), [])} vs {want}")
 
     # C
