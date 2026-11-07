@@ -23,7 +23,8 @@ MATH-442. Every check is run on every cell it applies to; the result is a list o
      must agree where both ran;
   E. Toda against Toda: the groups mod A of the computing diagrams of sections 5.2-5.5
      (Theorems 5.1-5.4) against the table of section 5.6 (whole groups): the difference must be
-     the alpha families, i.e. zero in the stems k = 0, 1 mod 4 (an assumption on what A holds:
+     the alpha families, i.e. zero in the stems k = 0, 1 mod 4 (E reads the table as printed;
+     D and the site use it with toda2003.CORRECTIONS_56) (an assumption on what A holds:
      alpha_t, alpha'_3s, alpha''_9t lie in the stems 4t-1, their unstable companions and the
      products of alpha elements in stems = 2 mod 4; section 5 does not define A explicitly); and the spheres of origin
      u(.) of (5.4.2)-(5.4.3) against the chains of the table.
@@ -191,13 +192,16 @@ def run(e2_dir=None):
                 note("D", r >= 0, f"S^{n}: the differentials into stem {k} would have rank {r} < 0")
             balance[n] = rs
 
-    # E
+    # E (on the table as printed: T.CORRECTIONS_56 are what this check found)
     dm = diagram_mod_a()
+    p56, _ = T.table56(printed=True)
     for k in range(1, 56):
         for n in range(3, T.T56_NMAX + 1, 2):
-            full, moda = T.log3(g56.get((k, n), [])), T.log3(dm.get((k, n), []))
+            full, moda = T.log3(p56.get((k, n), [])), T.log3(dm.get((k, n), []))
+            fixed = (" (the printed table omits a summand; corrected in the grid, D5-48)"
+                     if (k, n) in T.CORRECTIONS_56 and T.log3(g56.get((k, n), [])) == moda else "")
             if k % 4 in (0, 1):
-                note("E", full == moda, f"k={k} n={n}: 5.6 has log3 {full}, the diagrams mod A {moda}")
+                note("E", full == moda, f"k={k} n={n}: 5.6 has log3 {full}, the diagrams mod A {moda}{fixed}")
             else:
                 note("E", full >= moda, f"k={k} n={n}: 5.6 has log3 {full} < diagrams mod A {moda}")
     born = {r"\epsilon'": 7, r"\epsilon_1": 15, r"\epsilon_2": 11, r"\varphi": 9,
