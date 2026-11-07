@@ -50,3 +50,121 @@ def by_n():
 
 if __name__ == "__main__":
     print(" ".join(f"π{n}:{v}" for n, v in sorted(by_n().items())))
+
+
+# ---------------------------------------------------------------------------------------------
+# All columns (MATH-442). The tables of sections 5.6 and 6.5 and the computing diagrams of
+# section 5 are transcribed in toda03/ in a small line format, read from the page images:
+#
+#     k | m | 3:*=*->o=<\alpha_1>  | 9:*      one printed row; chains at their first column
+#     k | u | 4:a | 6!:b                      labels written above the row (H-images)
+#     k | l | 6:B                             labels written below the row (P-preimages)
+#     k | r | text                            a note at the right margin
+#
+# Columns: an odd number n is the sphere S^n; an even number is the place between n-1 and n+1
+# (where the source writes E^2, and where a label of Q^{n-1} stands). In a chain, '*' 'o' '>'
+# '(*)' are the summands Z/3, Z/9, Z/27 and Toda's parenthesised dot; '=' '->' '<~' are the
+# connecting E^2 (bijective, non-trivial not bijective, and the hook of section 5.2); a final
+# '=<...>' is the stable name, the chain then goes on unchanged to every larger n. A label
+# 'c:x' has the arrow of the source (to/from the dot), 'c!:x' is printed without it.
+
+import pathlib as _pl
+
+DIR = _pl.Path(__file__).resolve().parent / "toda03"
+ORDER = {"*": 3, "o": 9, ">": 27, "(*)": 3}
+
+
+def parse_chain(col, s):
+    """'3:*=*->o=<x>' -> (items, tail): items [(col, kind, token)] with kind 'sym' or 'con'."""
+    items, i, c, tail, want_sym = [], 0, col, None, True
+    while i < len(s):
+        if want_sym:
+            tok = "(*)" if s.startswith("(*)", i) else s[i]
+            if tok not in ORDER:
+                raise ValueError(f"bad symbol at {s[i:]!r} in {s!r}")
+            items.append((c, "sym", tok))
+            i += len(tok)
+            c += 1
+        else:
+            if s.startswith("=<", i):
+                tail = s[i + 2:].rstrip()
+                if not tail.endswith(">"):
+                    raise ValueError(f"bad tail in {s!r}")
+                tail = tail[:-1]
+                break
+            tok = next((t for t in ("->", "<~", "=") if s.startswith(t, i)), None)
+            if tok is None:
+                raise ValueError(f"bad connector at {s[i:]!r} in {s!r}")
+            items.append((c, "con", tok))
+            i += len(tok)
+            c += 1
+        want_sym = not want_sym
+    if want_sym:
+        raise ValueError(f"chain ends with a connector: {s!r}")
+    return items, tail
+
+
+def load(name):
+    """Rows of a transcription file: dicts k, kind, and chains / labels / note."""
+    rows = []
+    for line in (DIR / name).read_text(encoding="utf-8").splitlines():
+        if not line.strip() or line.startswith("#"):
+            continue
+        f = [x.strip() for x in line.split("|")]
+        k, kind, rest = int(f[0]), f[1], [x for x in f[2:] if x]
+        row = {"k": k, "kind": kind}
+        if kind == "m":
+            row["chains"] = []
+            for x in rest:
+                c, s = x.split(":", 1)
+                items, tail = parse_chain(int(c), s)
+                row["chains"].append({"start": int(c), "items": items, "tail": tail})
+        elif kind in ("u", "l"):
+            row["labels"] = []
+            for x in rest:
+                c, t = x.split(":", 1)
+                row["labels"].append((int(c.rstrip("!")), t, not c.endswith("!")))
+        elif kind == "r":
+            row["note"] = " | ".join(rest)
+        else:
+            raise ValueError(line)
+        rows.append(row)
+    return rows
+
+
+def groups(rows, nmax):
+    """{(k, n): sorted orders of the cyclic summands} for odd n <= nmax, read off the chains; a
+    chain with a stable name goes on with its last summand. Also {k: stable orders}."""
+    g, stable = {}, {}
+    for r in rows:
+        if r["kind"] != "m":
+            continue
+        for ch in r["chains"]:
+            syms = [(c, t) for c, kind, t in ch["items"] if kind == "sym"]
+            for c, t in syms:
+                if c % 2 == 0:
+                    raise ValueError(f"symbol on an even column, k={r['k']}")
+                g.setdefault((r["k"], c), []).append(ORDER[t])
+            if ch["tail"] is not None:
+                last_c, last_t = syms[-1]
+                for n in range(last_c + 2, nmax + 1, 2):
+                    g.setdefault((r["k"], n), []).append(ORDER[last_t])
+                stable.setdefault(r["k"], []).append((ORDER[last_t], ch["tail"]))
+    return {key: sorted(v) for key, v in g.items()}, stable
+
+
+def log3(orders):
+    return sum({3: 1, 9: 2, 27: 3}[o] for o in orders)
+
+
+T56_NMAX, T65_NMAX = 29, 37
+
+
+def table56():
+    """Section 5.6: whole 3-primary groups (alpha families included), k <= 55, n = 3..29."""
+    return groups(load("t56.txt"), T56_NMAX)
+
+
+def table65():
+    """Section 6.5: groups mod A, 56 <= k <= 79, n = 3..37 (k = 76, 77 'not yet fixed')."""
+    return groups(load("t65.txt"), T65_NMAX)
