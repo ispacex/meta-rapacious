@@ -62,8 +62,9 @@ def gname(orders):
     return "·".join(out)
 
 
-def grid(g, st, ks, nmax, flag=None):
-    """k rows, odd n columns, the group in each cell; the last column the stable group."""
+def grid(g, st, ks, nmax, flag=None, fixed=None):
+    """k rows, odd n columns, the group in each cell; the last column the stable group. Cells in
+    `flag` are marked red (a disagreement), cells in `fixed` amber with a star (corrected)."""
     head = "".join(f"<th>{n}</th>" for n in range(3, nmax + 1, 2))
     body = []
     for k in ks:
@@ -71,6 +72,8 @@ def grid(g, st, ks, nmax, flag=None):
         for n in range(3, nmax + 1, 2):
             v = gname(g.get((k, n), []))
             c = ' class="bad"' if flag and (k, n) in flag else ""
+            if fixed and (k, n) in fixed:
+                c, v = ' class="amb"', v + "*"
             tds.append(f"<td{c}>{v}</td>")
         stab = gname(sorted(o for o, _ in st.get(k, [])))
         body.append(f"<tr><th>{k}</th>{''.join(tds)}<td>{stab}</td></tr>")
@@ -94,18 +97,22 @@ def s5_body():
 
 
 def write_csv(path):
-    """data/toda2003_groups.csv: every cell of both tables."""
+    """data/toda2003_groups.csv: every cell of both tables; 'printed' is the group as the table
+    prints it, which differs from 'group' only in the cells of T.CORRECTIONS_56."""
     import csv
     g56, _ = T.table56()
+    p56, _ = T.table56(printed=True)
     g65, _ = T.table65()
     with open(path, "w", newline="") as f:
         w = csv.writer(f, lineterminator="\n")
-        w.writerow(["section", "k", "n", "group", "log3_order", "mod_A"])
-        for sec, g, ks, nmax, moda in (("5.6", g56, range(1, 56), T.T56_NMAX, 0), ("6.5", g65, range(56, 80), T.T65_NMAX, 1)):
+        w.writerow(["section", "k", "n", "group", "log3_order", "mod_A", "printed"])
+        fmt = (lambda o: ".".join(map(str, sorted(o, reverse=True))) or "0")
+        for sec, g, p, ks, nmax, moda in (("5.6", g56, p56, range(1, 56), T.T56_NMAX, 0),
+                                          ("6.5", g65, g65, range(56, 80), T.T65_NMAX, 1)):
             for k in ks:
                 for n in range(3, nmax + 1, 2):
                     o = g.get((k, n), [])
-                    w.writerow([sec, k, n, ".".join(map(str, sorted(o, reverse=True))) or "0", T.log3(o), moda])
+                    w.writerow([sec, k, n, fmt(o), T.log3(o), moda, fmt(p.get((k, n), []))])
 
 
 CHECK_NAMES = {
@@ -178,7 +185,9 @@ that has not been done for them, and the grid of §6.5 below is mod A, as in Tod
     s += t("<h3>§5.6: ${}_3\\pi_{n+k}(S^n)$, $k\\le55$, целые группы</h3>", "<h3>§5.6: ${}_3\\pi_{n+k}(S^n)$, $k\\le55$, whole groups</h3>")
     s += t("<p>PDF, страницы 67–68 (печатные 60–61). Строк нет для $k=1,2,4,5,8,9,12,25$: там групп нет.</p>",
            "<p>PDF pages 67–68 (printed 60–61). There are no rows for $k=1,2,4,5,8,9,12,25$: the groups are zero there.</p>")
-    s += gnote + grid(g56, st56, range(1, 56), T.T56_NMAX, flag)
+    s += gnote + grid(g56, st56, range(1, 56), T.T56_NMAX, flag, set(T.CORRECTIONS_56))
+    s += t("<p class=muted>* — клетка исправлена: в печатной таблице §5.6 этого слагаемого нет, его даёт текст Тоды (<a href=\"#disc\">расхождения</a>, п. 1).</p>",
+           "<p class=muted>* The cell is corrected: the printed table of §5.6 omits this summand, Toda's own text gives it (<a href=\"#disc\">discrepancies</a>, item 1).</p>")
     s += t("<h3>§6.5: ${}_3\\pi_{n+k}(S^n)$ mod A, $56\\le k\\le79$</h3>", "<h3>§6.5: ${}_3\\pi_{n+k}(S^n)$ mod A, $56\\le k\\le79$</h3>")
     s += t("<p>PDF, страницы 80–81 (печатные 73–74). Тода: «результаты для $k=76$ и $k=77$ ещё не окончательны, мы показываем пример; варианты — в предложении 6.3».</p>",
            "<p>PDF pages 80–81 (printed 73–74). Toda: “The results for $k=76$ and $k=77$ are not yet fixed and we show an example. The variations are seen in Proposition 6.3.”</p>")
@@ -193,8 +202,8 @@ Checks B–D are independent of Toda 2003; E compares two places of the paper it
     s += checks_html(lang, res, e2_info)
     s += t("<h2 id=disc>Расхождения</h2>", "<h2 id=disc>Discrepancies</h2>")
     s += "<ol>" + "".join(f"<li>{d[0 if lang == 'ru' else 1]}</li>" for d in disc) + "</ol>"
-    s += t('<p><a href="data/toda2003_groups.csv">toda2003_groups.csv</a> — все клетки обеих таблиц (столбцы: раздел, $k$, $n$, группа, $\\log_3$ порядка, mod A).</p>',
-           '<p><a href="data/toda2003_groups.csv">toda2003_groups.csv</a>: every cell of both tables (columns: section, $k$, $n$, group, $\\log_3$ of the order, mod A).</p>')
+    s += t('<p><a href="data/toda2003_groups.csv">toda2003_groups.csv</a> — все клетки обеих таблиц (столбцы: раздел, $k$, $n$, группа, $\\log_3$ порядка, mod A, группа как напечатано — отличается только в исправленной клетке).</p>',
+           '<p><a href="data/toda2003_groups.csv">toda2003_groups.csv</a>: every cell of both tables (columns: section, $k$, $n$, group, $\\log_3$ of the order, mod A, the group as printed, which differs only in the corrected cell).</p>')
     return s
 
 
