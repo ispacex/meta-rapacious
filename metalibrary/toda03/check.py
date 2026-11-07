@@ -82,22 +82,20 @@ def toda1962():
 
 
 def e2_dims(e2_dir):
-    """{(n, k): total dim} from sseq_S<n>.csv and {(n, k): dim} from lambda_m<m>.csv."""
+    """{(n, k): total dim} of sseq and of H(Lambda(m)), with the stems each went up to, from
+    E2_DIR/e2_packed.txt (e2_pack.py of the output of e2_job.sh)."""
     sseq, lam = collections.Counter(), collections.Counter()
     sseq_kmax, lam_kmax = {}, {}
-    for f in sorted(pathlib.Path(e2_dir).glob("sseq_S*.csv")):
-        n = int(re.search(r"S(\d+)", f.name).group(1))
-        for line in f.read_text().splitlines():
-            t, s, d = map(int, line.split(","))
-            k = t - n
-            sseq_kmax[n] = max(sseq_kmax.get(n, 0), k)
-            if k >= 1 and d:
-                sseq[(n, k)] += d
-    for f in sorted(pathlib.Path(e2_dir).glob("lambda_m*.csv")):
-        for line in f.read_text().splitlines()[1:]:
-            m, k, s, d = map(int, line.split(","))
-            lam[(2 * m + 1, k)] += d
-            lam_kmax[2 * m + 1] = max(lam_kmax.get(2 * m + 1, 0), k)
+    for line in (pathlib.Path(e2_dir) / "e2_packed.txt").read_text().splitlines():
+        f = line.split()
+        if f[0] == "#S":
+            sseq_kmax[int(f[1])] = int(f[3])
+        elif f[0] == "#L":
+            lam_kmax[int(f[1])] = int(f[3])
+        elif f[0] in ("L", "S"):
+            n, k = int(f[1]), int(f[2])
+            tot = sum(int(x.split(":")[1]) for x in f[3].split(","))
+            (lam if f[0] == "L" else sseq)[(n, k)] += tot
     return sseq, sseq_kmax, lam, lam_kmax
 
 
