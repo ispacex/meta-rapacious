@@ -120,25 +120,44 @@ the current `check.py` can hold in memory.
 
 ## Certificates: what is certified and what is not
 
-**Decision.** The certificate files themselves are not stored: they are 45–58 bytes per word (17.8 GB
-for part1 alone). For each block, `cert_hashes.sh` has `certlow` write the certificate, the unchanged
-trusted `../cert/check.py` check it (through `check_block.py`), and keeps only the certificate's sha256
-and the rank `check.py` accepted. `certlow` is deterministic, so a certificate can be rebuilt and
-compared with its hash. Only blocks whose check fits in 14 GB get a certificate. The trusted checkers
-(`check.py`, Lean) are not changed.
+**Decision.** The certificate files themselves are not stored: they average about 60 bytes per word
+(21–301 per block, 33–139 on blocks of at least $10^5$ words), 17.8 GB for the 696 certified blocks
+below. For each block, `cert_hashes.sh` has `certlow` write the certificate, the unchanged trusted
+`../cert/check.py` check it (through `check_block.py`), and keeps only the certificate's sha256 and the
+rank `check.py` accepted. `certlow` is deterministic, so a certificate can be rebuilt and compared with
+its hash. Only blocks whose check fits in 14 GB get a certificate. The trusted checkers (`check.py`,
+Lean) are not changed.
 
-**part1 (`../data/open_blocks_part1.txt`, 697 blocks, $3.05\cdot10^8$ words): 696 certified, 1 not.**
+**What a block certificate proves.** `check_block` checks a triangular pivot structure, so a block
+certificate proves **rank ≥ r** for that block (header of `cert_hashes.sh`). The exact rank, and so the
+exact dimension of an $E^2$ cell, also needs the cell certificates of `check.py` (its steps 2–3). `cert/`
+has those only for $\pi_{22}$–$\pi_{23}$, $\pi_{49}$–$\pi_{51}$ and $\pi_{59}$–$\pi_{60}$, not for the cells
+of the blocks below. So the exact ranks in `../data/ranks_part*.csv` and the cells of
+`../data/e2_known.csv` built from them are computed (`lowmem`, and they agree with the $Q$-weight), not
+certified, whether or not their blocks have a certificate.
+
+**part1 (`../data/open_blocks_part1.txt`, 697 blocks, $3.05\cdot10^8$ words): 696 block ranks certified
+as lower bounds, 1 not.**
 - `../data/cert_hashes_part1.csv` (n, s, colour, words, rank, bytes, sha256, check) lists 696 blocks
   of up to $4.99\cdot10^6$ words. Each rank there is the one `check.py` accepted, and each equals the
-  rank in `../data/ranks_part1.csv`. As above, a block certificate proves rank ≥ that number; the exact
-  rank also needs an upper bound, which `cert/` gets from cell certificates.
+  rank in `../data/ranks_part1.csv`, so for these blocks the computed rank is also a certified lower
+  bound. `cert_hashes.sh` writes a row only when `check.py` accepted the block; the `check` column
+  (`ok`) was added when the rows were collected and carries no further information.
 - `../data/cert_uncertified_part1.txt` lists the one block without a certificate: **83 12 8**
-  ($4.94\cdot10^6$ words). Its `check.py` run needed more than 14 GB (`CHECK_MEM_GB=14`).
-- `check.py` took 2–6 KB per word, not the 2 KB estimated above, because its caches grow with the length
-  of the words. So the limit is not a word count. 84 12 9 and 83 17 13 ($1.8\cdot10^6$ words) failed
-  with 6 GB and passed with 14 GB, while 84 20 13 ($5.0\cdot10^6$ words, short words) passed with 12 GB.
-- `python3 spasm/check_cert_hashes.py` checks the bookkeeping: every part1 block is in exactly one of
-  the two files, and words and ranks agree with `open_blocks_part1.txt` and `ranks_part1.csv`.
+  ($4.94\cdot10^6$ words). Its `check.py` run failed with `MemoryError` under `CHECK_MEM_GB=14`.
+- `check.py` needs more than the 2 KB per word estimated above, and how much more depends on the
+  length of the words, not only on their number. The limits are `ulimit -v` on virtual memory, so
+  these are bounds on address space, not on resident memory.
+  - 84 12 9 and 83 17 13 ($1.8\cdot10^6$ words) failed with 6 GB and passed with 14 GB:
+    3.3–7.6 KB per word.
+  - 83 12 8 failed with 14 GB: more than 2.8 KB per word.
+  - 84 20 13 ($5.0\cdot10^6$ words) passed with 12 GB: at most 2.4 KB per word.
+- `python3 spasm/check_cert_hashes.py` checks the bookkeeping. Every part1 block is in exactly one of
+  the two files, and words and ranks agree with `open_blocks_part1.txt` and `ranks_part1.csv`. It
+  also checks that each hash is well-formed and distinct. `--selftest` runs it on 20 altered copies of
+  the data, such as a changed rank, a dropped, duplicated or doubly listed block, a bad or repeated
+  sha256, a wrong word count or reason, or a duplicate reference row. Each must be reported, and the
+  unaltered copy must pass.
 
 **How the CSV was made.** It is the union of the per-block results (`logs/*.csv`) of these jobs:
 - kimmy: `kimmy/tm/20261106-185305-m106-cert-small-54dcf31` (blocks up to $10^6$ words),
@@ -151,17 +170,17 @@ compared with its hash. Only blocks whose check fits in 14 GB get a certificate.
   `m106-speedprobe-*`) are duplicates of rows above.
 
 The first four kimmy jobs were killed for memory partway, before `cert_hashes.sh` capped each check
-(`c94a7ba`), and the blocks they had not finished were rerun. 7 blocks were checked twice (81 19 1 on
+(`c94a7ba`), and the blocks they had not finished were rerun. In R1, 84 15 12, 84 12 9 and 83 17 13
+failed under `CHECK_MEM_GB=6` and passed in R14 under 14 GB. 7 blocks were checked twice (81 19 1 on
 both machines), always with the same hash and rank. A tm job on each runner compared the CSV with every
 `logs/*.csv` there. It found 0 differences, and the two runners together account for all 696 rows
 (`kimmy/tm/20261107-095822-m106-verify-csv-887cfe4`, `ax42/tm/20261107-095823-m106-verify-csv-887cfe4`).
 
-**part2 and the rest (`../data/ranks_part2.csv`, `../data/ranks_part3.csv`): not certified.** These are
-149 blocks, $6.61\cdot10^9$ words, from $5.0\cdot10^6$ to $3.0\cdot10^8$ words per block. At 2–6 KB per
-word, `check.py` would need from about 10 GB to over 600 GB per block. Their ranks come from `lowmem`
-alone, so the cells of `../data/e2_known.csv` that depend on them are not certified, although they agree
-with the $Q$-weight. Certifying them needs a checker that does not list the words, which would be a
-change to trusted code.
+**part2 and the rest (`../data/ranks_part2.csv`, `../data/ranks_part3.csv`): no certificates.** These
+are 149 blocks, $6.61\cdot10^9$ words, from $5.0\cdot10^6$ to $3.0\cdot10^8$ words per block. At 2.4–7.6 KB
+per word, `check.py` would need from about 12 GB to about 2 TB per block. Their ranks come from `lowmem`
+alone; not even the lower bound is certified. Certifying them needs a checker that does not list the
+words, which would be a change to trusted code.
 
 ## Reproducing
 
@@ -171,5 +190,5 @@ spasm/bench.sh spasm/blocks_small.txt 3            # SPASM_TIMEOUT=1200 SPASM_VA
 spasm/bench.sh spasm/blocks_large.txt 4
 spasm/par_blocks.sh data/open_blocks_part2.txt 2 2 lowmem
 CHECK_MEM_GB=14 spasm/cert_hashes.sh BLOCKS 1          # sha256 + check.py rank per block -> $JOB_OUT/cert_hashes.csv
-python3 spasm/check_cert_hashes.py
+python3 spasm/check_cert_hashes.py && python3 spasm/check_cert_hashes.py --selftest
 ```
