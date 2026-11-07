@@ -99,6 +99,25 @@ has substance on the 21 open cells and on the nonzero ones. These ranks have no
 certificates yet (see the checker limit above).
 
 
+## The rest of `open_blocks.txt`
+
+The 65 blocks of `open_blocks.txt` that are neither in part1 nor in part2 have $5.54\cdot10^9$ words.
+Each has more than $3\cdot10^7$ words, and the largest has $3.0\cdot10^8$. Their ranks are in
+`../data/ranks_part3.csv`. They were computed in two jobs:
+- the 19 blocks over $10^8$ words on ax42, one at a time with 8 threads, in 3 h 6 min
+  (ax42/tm/20261106-185100-m106-rest-big-0afb999);
+- the 46 blocks of $3\cdot10^7$–$10^8$ words on kimmy, two at a time with 3 threads, in 3 h 55 min
+  (kimmy/tm/20261106-185101-m106-rest-mid-0afb999).
+
+With this, all 846 blocks of `open_blocks.txt` have ranks.
+
+`merge_ranks.py` on part1, part2 and part3 gives 714 cells, 58 of them new. 28 of the new cells were
+open in `e2_colours.csv`: 13 are nonzero and 15 are zero. The other 4 new cells that have a row in
+`e2_colours.csv` were already determined (all nonzero), and 26 had no row there (already known to be
+zero; all 26 come out zero). **No open cell of `e2_colours.csv` is left. All 714 cells agree with
+`e2_qgrade.csv`.** Like part2, these ranks have no certificates: every block is far above the size
+the current `check.py` can hold in memory.
+
 ## Reproducing
 
 ```bash
