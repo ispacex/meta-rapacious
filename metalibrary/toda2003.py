@@ -165,7 +165,7 @@ T56_NMAX, T65_NMAX = 29, 37
 #   (45, 9): Theorem 5.3 (1) (p. 53, PDF 60) has the removable simple element P(B_2) at
 #   (n, k) = (9, 45), H P(B_2) = AB_2; the table shows only the Z/9 of phi. The EHP sequence
 #   (2.1.3) decides it: pi_51(S^7) = 0, so H maps pi_54(S^9) onto pi_51(Q_2^7) = (Z/3)^2
-#   (Lemma 2.2, Proposition 2.1: pi^S_30 = <beta_1^3>, pi^S_29 = <alpha_1 beta_2>), and the
+#   (Proposition 2.1: pi^S_30 = <beta_1^3>, pi^S_29 = <alpha_1 beta_2>, no im J), and the
 #   kernel E^2 pi_52(S^7) is Z/3, so the group is Z/9 + Z/3 (tracker D5-48).
 CORRECTIONS_56 = {(45, 9): [3]}
 
