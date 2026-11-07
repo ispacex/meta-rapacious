@@ -9,7 +9,9 @@
 # Result: $JOB_OUT/cert_hashes.csv: n,s,colour,words,rank,bytes,sha256 -- rank is the one check.py
 # accepted; a block certificate proves rank >= that number (the exact rank also needs an upper
 # bound, which cert/ gets from cell certificates). A block whose check fails is listed in $JOB_OUT/failed.txt. check.py needs about
-# 2 KB per word, so PAR blocks of up to W words need about PAR * 2 KB * W.
+# 2-6 KB per word (its caches grow with the length of the words), so PAR blocks need PAR times
+# that. CHECK_MEM_GB caps each check's address space (ulimit -v): a block that needs more fails
+# with MemoryError and is listed as "n s c memory" instead of the whole job being killed.
 set -euo pipefail
 blocks=$1 par=$2
 : "${JOB_OUT:=$PWD/out}"
@@ -19,7 +21,7 @@ rm -f "$JOB_OUT"/logs/*.csv
 source "$(dirname "$0")/cargo-env.sh"
 export CARGO_TARGET_DIR="${JOB_CACHE:-$PWD/rust}/target"
 (cd rust && cargo build --release -q --bin certlow)
-export B="$CARGO_TARGET_DIR/release" JOB_OUT
+export B="$CARGO_TARGET_DIR/release" JOB_OUT CHECK_MEM_GB
 one() {
   set -uo pipefail
   read -r n s c _ <<< "$1"
@@ -27,12 +29,14 @@ one() {
   mkdir -p "$d"
   echo "$n $s $c" > "$d/b.txt"
   if "$B/certlow" "$d/b.txt" "$d" 1 2> "$JOB_OUT/logs/$tag.gen" \
-     && python3 -I spasm/check_block.py "$d/block_$tag.txt" > "$d/ok" 2> "$JOB_OUT/logs/$tag.check"; then
+     && ( [ -z "${CHECK_MEM_GB:-}" ] || ulimit -v $((CHECK_MEM_GB * 1024 * 1024))
+          exec python3 -I spasm/check_block.py "$d/block_$tag.txt" ) > "$d/ok" 2> "$JOB_OUT/logs/$tag.check"; then
     r=$(cut -d, -f4 "$d/ok")
     w=$(head -1 "$d/block_$tag.txt" | cut -d' ' -f6)
     echo "$n,$s,$c,$w,$r,$(wc -c < "$d/block_$tag.txt" | tr -d ' '),$( (sha256sum 2>/dev/null || shasum -a 256) < "$d/block_$tag.txt" | cut -c1-64)" > "$JOB_OUT/logs/$tag.csv"
   else
-    echo "$n $s $c" >> "$JOB_OUT/failed.txt"
+    why=check; grep -q MemoryError "$JOB_OUT/logs/$tag.check" 2>/dev/null && why=memory
+    echo "$n $s $c $why" >> "$JOB_OUT/failed.txt"
   fi
   rm -rf "$d"
 }
