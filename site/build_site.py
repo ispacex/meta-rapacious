@@ -465,12 +465,43 @@ def main():
 
 
 # The E_2 used by check D of Toda 2003 (metalibrary/data/toda03_e2/, the tm job of toda03/e2_job.sh)
-E2_INFO_RU = "(E2_JOB)"
-E2_INFO_EN = "(E2_JOB)"
+E2_INFO_RU = ("(задание tm kimmy/tm/20261107-005511-m442-e2-5270087: sseq/ext JoeyBF/sseq@7d63ea9, модуль <code>S_3[n]</code>, нечётные $n\\le37$, $k\\le79$; $H(\\Lambda(m))$, $m\\le18$, $k\\le58$; где посчитаны обе, они совпали во всех клетках $(n,k)$)")
+E2_INFO_EN = ("(tm job kimmy/tm/20261107-005511-m442-e2-5270087: sseq/ext JoeyBF/sseq@7d63ea9, module <code>S_3[n]</code>, odd $n\\le37$, $k\\le79$; $H(\\Lambda(m))$, $m\\le18$, $k\\le58$; where both ran they agree in every cell $(n,k)$)")
 
 # Discrepancies of Toda 2003 (MATH-442), each (ru, en)
 DISC = [
-    ("(список ещё не заполнен)", "(not filled in yet)"),
+    ("<b>$\\pi_{54}(S^9)$, $k=45$, $n=9$ — открыто.</b> Теорема 5.3 (1) (с. 53, PDF 60) даёт на $S^9$ простой неустойчивый элемент $(n,k)=(9,45)$ "
+     "($AB_2$ над точкой, $B_2$ под ней), т. е. mod A $\\pi^9_{54}\\supseteq\\mathbf Z/9\\oplus\\mathbf Z/3$; таблица §5.6 (с. 61) в $k=45$, $n=9$ "
+     "показывает только $\\circ$ (кольцо $\\varphi$), то есть $\\mathbf Z/9$. Стем $45\\equiv1\\pmod4$, α-семейств нет, так что обе записи — о целой группе. "
+     "За теорему: пары $ab_2/AB_2$ стоят у Тоды в $(3,32)/(3,33)$, $(9,44)/(9,45)$, $(15,56)/(15,57)$, $(21,68)/(21,69)$, и в таблицах есть все, кроме $(9,45)$; "
+     "все остальные пары простых элементов $ab/AB$ в таблице §5.6 есть. Скорее всего, в таблице §5.6 пропущена точка, и "
+     "${}_3\\pi_{54}(S^9)=\\mathbf Z/9\\oplus\\mathbf Z/3$. $E_2$ этого не решает: $\\dim E_2(S^9)$ в стеме 45 равна 8, баланс дифференциалов сходится в обоих вариантах. "
+     "В сетке выше клетка оставлена как в таблице и отмечена красным. Это не наша ошибка прочтения: рецензент перечитал это место независимо.",
+     "<b>$\\pi_{54}(S^9)$, $k=45$, $n=9$: open.</b> Theorem 5.3 (1) (p. 53, PDF 60) has a removable simple unstable element at $(n,k)=(9,45)$ "
+     "($AB_2$ above the dot, $B_2$ below it), so mod A $\\pi^9_{54}\\supseteq\\mathbf Z/9\\oplus\\mathbf Z/3$; the table of §5.6 (p. 61) at $k=45$, $n=9$ "
+     "shows only the $\\circ$ of $\\varphi$, that is $\\mathbf Z/9$. The stem $45\\equiv1\\pmod4$ has no alpha families, so both speak of the whole group. "
+     "For the theorem: Toda's pairs $ab_2/AB_2$ stand at $(3,32)/(3,33)$, $(9,44)/(9,45)$, $(15,56)/(15,57)$, $(21,68)/(21,69)$, and the tables have all of them but $(9,45)$; "
+     "every other pair $ab/AB$ of simple elements is in the table of §5.6. Most likely the table of §5.6 misses a dot, and "
+     "${}_3\\pi_{54}(S^9)=\\mathbf Z/9\\oplus\\mathbf Z/3$. $E_2$ does not decide it: $\\dim E_2(S^9)$ in the stem 45 is 8, and the balance of the differentials works out either way. "
+     "In the grid above the cell is left as in the table and marked red. It is not our misreading: the reviewer re-read the place independently."),
+    ("<b>Опечатки в тексте §5</b> (на группы не влияют; в тексте помечены [sic]): $AAB_2$ вместо $ABB_2$ в (5.1.7); $ab_2^2$ дважды в (5.1.8); "
+     "«(13) of (5.5.1)» вместо (5.1.1) на с. 46; $\\beta^4$ вместо $\\beta_1^4$ и $y=b_2^2$ вместо $b^2b_2$ в (5.1.11); «und» в предложении 5.3; "
+     "$\\pi^5_{7+k}$ вместо $\\pi^7_{7+k}$ на с. 49; $H_p(\\partial\\alpha(\\xi))$ в лемме 5.2; метка $E^2$ вместо $E_2$ в диаграмме теоремы 5.4 (2), $k=53$; "
+     "в той же диаграмме при $k=55$ напечатано $\\bullet=\\bullet\\hookleftarrow\\bullet$, а таблица §5.6 и строки $k=43,45$ теоремы 5.3 дают $\\bullet\\hookleftarrow\\bullet=\\bullet$; "
+     "в таблице §5.6 при $k=49$ стабильная метка $\\alpha_1\\beta_1\\beta_2$ вместо $\\alpha_1\\beta_1^2\\beta_2$ ((17) в (5.1.1)).",
+     "<b>Misprints in the text of §5</b> (no effect on the groups; marked [sic] in the text): $AAB_2$ for $ABB_2$ in (5.1.7); $ab_2^2$ twice in (5.1.8); "
+     "“(13) of (5.5.1)” for (5.1.1) on p. 46; $\\beta^4$ for $\\beta_1^4$ and $y=b_2^2$ for $b^2b_2$ in (5.1.11); “und” in Proposition 5.3; "
+     "$\\pi^5_{7+k}$ for $\\pi^7_{7+k}$ on p. 49; $H_p(\\partial\\alpha(\\xi))$ in Lemma 5.2; the label $E^2$ for $E_2$ in the diagram of Theorem 5.4 (2), $k=53$; "
+     "in the same diagram at $k=55$ the print has $\\bullet=\\bullet\\hookleftarrow\\bullet$, whereas the table of §5.6 and the rows $k=43,45$ of Theorem 5.3 give $\\bullet\\hookleftarrow\\bullet=\\bullet$; "
+     "in the table of §5.6 the stable name at $k=49$ is $\\alpha_1\\beta_1\\beta_2$ for $\\alpha_1\\beta_1^2\\beta_2$ ((17) of (5.1.1))."),
+    ("<b>Скан:</b> страница «(3) Let $\\xi=\\alpha_1(7)\\circ\\varphi(10)$ …» напечатана дважды (PDF 65 и 66, номера 58 и 59, два оттиска одного текста); "
+     "в таблице §6.5 цепочки $k=74$ ($\\beta_5$) и $k=75$ ($\\mu$) заходят одним символом под заголовок «stable» — групп это не меняет.",
+     "<b>The scan:</b> the page “(3) Let $\\xi=\\alpha_1(7)\\circ\\varphi(10)$ …” is printed twice (PDF 65 and 66, numbered 58 and 59, two printings of one text); "
+     "in the table of §6.5 the chains of $k=74$ ($\\beta_5$) and $k=75$ ($\\mu$) run one symbol into the header “stable”, which changes no group."),
+    ("<b>Имена, не числа.</b> Стабильные образующие Тоды и таблицы A3.2 Равенеля называются по-разному: $\\epsilon'=\\langle\\alpha_1,\\alpha_1,\\beta_1^3\\rangle$, "
+     "$\\epsilon_1=\\beta_{3/2}$, $\\epsilon_2=\\beta_3$, $\\varphi=x_{45}$, $\\lambda=x_{68}$, $\\mu=x_{75}$; порядки совпадают везде (проверка B). Расхождений с Тодой 1962 и со стабильными стемами нет.",
+     "<b>Names, not numbers.</b> Toda's stable generators and those of Ravenel's Table A3.2 have different names: $\\epsilon'=\\langle\\alpha_1,\\alpha_1,\\beta_1^3\\rangle$, "
+     "$\\epsilon_1=\\beta_{3/2}$, $\\epsilon_2=\\beta_3$, $\\varphi=x_{45}$, $\\lambda=x_{68}$, $\\mu=x_{75}$; the orders agree everywhere (check B). There is no disagreement with Toda 1962 or with the stable stems."),
 ]
 
 
