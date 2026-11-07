@@ -1,0 +1,3 @@
+# Blocks of open_blocks_part1.txt without a checked certificate (MATH-106).
+# n s colour words reason -- "memory": cert/check.py needed more than 14 GiB of address space (CHECK_MEM_GB=14, ax42/tm/20261107-021850-m106-cert-RA-c94a7ba)
+83 12 8 4937326 memory
