@@ -118,6 +118,51 @@ zero; all 26 come out zero). **No open cell of `e2_colours.csv` is left. All 714
 `e2_qgrade.csv`.** Like part2, these ranks have no certificates: every block is far above the size
 the current `check.py` can hold in memory.
 
+## Certificates: what is certified and what is not
+
+**Decision.** The certificate files themselves are not stored: they are 45–58 bytes per word (17.8 GB
+for part1 alone). For each block, `cert_hashes.sh` has `certlow` write the certificate, the unchanged
+trusted `../cert/check.py` check it (through `check_block.py`), and keeps only the certificate's sha256
+and the rank `check.py` accepted. `certlow` is deterministic, so a certificate can be rebuilt and
+compared with its hash. Only blocks whose check fits in 14 GB get a certificate. The trusted checkers
+(`check.py`, Lean) are not changed.
+
+**part1 (`../data/open_blocks_part1.txt`, 697 blocks, $3.05\cdot10^8$ words): 696 certified, 1 not.**
+- `../data/cert_hashes_part1.csv` (n, s, colour, words, rank, bytes, sha256, check) lists 696 blocks
+  of up to $4.99\cdot10^6$ words. Each rank there is the one `check.py` accepted, and each equals the
+  rank in `../data/ranks_part1.csv`. As above, a block certificate proves rank ≥ that number; the exact
+  rank also needs an upper bound, which `cert/` gets from cell certificates.
+- `../data/cert_uncertified_part1.txt` lists the one block without a certificate: **83 12 8**
+  ($4.94\cdot10^6$ words). Its `check.py` run needed more than 14 GB (`CHECK_MEM_GB=14`).
+- `check.py` took 2–6 KB per word, not the 2 KB estimated above, because its caches grow with the length
+  of the words. So the limit is not a word count. 84 12 9 and 83 17 13 ($1.8\cdot10^6$ words) failed
+  with 6 GB and passed with 14 GB, while 84 20 13 ($5.0\cdot10^6$ words, short words) passed with 12 GB.
+- `python3 spasm/check_cert_hashes.py` checks the bookkeeping: every part1 block is in exactly one of
+  the two files, and words and ranks agree with `open_blocks_part1.txt` and `ranks_part1.csv`.
+
+**How the CSV was made.** It is the union of the per-block results (`logs/*.csv`) of these jobs:
+- kimmy: `kimmy/tm/20261106-185305-m106-cert-small-54dcf31` (blocks up to $10^6$ words),
+  `kimmy/tm/20261106-230743-m106-cert-K1-a8073fd`, `kimmy/tm/20261107-002108-m106-cert-S1-709ad7b`,
+  `kimmy/tm/20261107-002110-m106-cert-S2-709ad7b`, `kimmy/tm/20261107-022236-m106-cert-R1-c94a7ba`,
+  `kimmy/tm/20261107-022238-m106-cert-RK-c94a7ba`;
+- ax42: `ax42/tm/20261106-230740-m106-cert-A1-a8073fd`, `ax42/tm/20261107-021850-m106-cert-RA-c94a7ba`,
+  `ax42/tm/20261107-083210-m106-cert-R14-f389ab3`;
+- blocks that were also finished in stopped or probe jobs (`m106-cert-1e6`, `m106-cert-2e6`,
+  `m106-speedprobe-*`) are duplicates of rows above.
+
+The first four kimmy jobs were killed for memory partway, before `cert_hashes.sh` capped each check
+(`c94a7ba`), and the blocks they had not finished were rerun. 7 blocks were checked twice (81 19 1 on
+both machines), always with the same hash and rank. A tm job on each runner compared the CSV with every
+`logs/*.csv` there. It found 0 differences, and the two runners together account for all 696 rows
+(`kimmy/tm/20261107-095822-m106-verify-csv-887cfe4`, `ax42/tm/20261107-095823-m106-verify-csv-887cfe4`).
+
+**part2 and the rest (`../data/ranks_part2.csv`, `../data/ranks_part3.csv`): not certified.** These are
+149 blocks, $6.61\cdot10^9$ words, from $5.0\cdot10^6$ to $3.0\cdot10^8$ words per block. At 2–6 KB per
+word, `check.py` would need from about 10 GB to over 600 GB per block. Their ranks come from `lowmem`
+alone, so the cells of `../data/e2_known.csv` that depend on them are not certified, although they agree
+with the $Q$-weight. Certifying them needs a checker that does not list the words, which would be a
+change to trusted code.
+
 ## Reproducing
 
 ```bash
@@ -125,4 +170,6 @@ cd metalibrary
 spasm/bench.sh spasm/blocks_small.txt 3            # SPASM_TIMEOUT=1200 SPASM_VARIANTS="plain flip"
 spasm/bench.sh spasm/blocks_large.txt 4
 spasm/par_blocks.sh data/open_blocks_part2.txt 2 2 lowmem
+CHECK_MEM_GB=14 spasm/cert_hashes.sh BLOCKS 1          # sha256 + check.py rank per block -> $JOB_OUT/cert_hashes.csv
+python3 spasm/check_cert_hashes.py
 ```
