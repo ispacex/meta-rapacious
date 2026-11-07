@@ -7,7 +7,10 @@ The static site with the results: https://ispacex.github.io/metalibrary/
     site/two_tier.sh OUT_DIR                    # search index into the form ispacex's engine reads
 
 Reads only data that is already computed (no new computation): metalibrary/data/*.csv,
-metalibrary/toda2003.py, metalibrary/out/7_e2_rapacious_{ru,en}{,_dark}.png.
+metalibrary/toda2003.py, metalibrary/out/7_e2_rapacious_{ru,en}{,_dark}.png; for Toda's 2003
+tables (toda2003.html, toda2003_s5.html: site/toda_site.py) the transcriptions in
+metalibrary/toda03/, its checks (toda03/check.py, a second) and the E_2 of the odd spheres in
+metalibrary/data/toda03_e2/ (computed by the tm job toda03/e2_job.sh).
 The rapacious rule is re-run on that data (a fraction of a second). The output is a static
 site (HTML, KaTeX from jsDelivr, CSV/JSON downloads) published from the public repository
 ispacex/metalibrary via GitHub Pages; the code that makes it is this repository.
@@ -40,6 +43,9 @@ ROOT = HERE.parent
 sys.path.insert(0, str(ROOT / "metalibrary"))
 import rapacious as R  # noqa: E402
 import toda2003  # noqa: E402
+sys.path.insert(0, str(ROOT / "metalibrary" / "toda03"))
+import check as toda_check  # noqa: E402
+import toda_site as TS  # noqa: E402
 
 OUT = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else HERE / "out"
 LANGS = ("ru", "en")
@@ -119,6 +125,8 @@ code { background:var(--soft); padding:0 .25em; border-radius:3px; }
 footer { border-top:1px solid var(--line); margin-top:3rem; }
 """
 
+CSS += TS.CSS
+
 KATEX = """<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
@@ -192,10 +200,10 @@ def palette(lang):
 
 FOOTER = {
     "ru": """Пересчёт к лекции Р. В. Михайлова «Цветные метабиблиотеки. Разум пространства»
-(02.09.2016). Данные от {date}. Все числа на этих страницах — 3-примарные: ранг 3-кручения, все слагаемые $\\mathbb Z/3$.<br>
+(02.09.2016). Данные от {date}. Все числа на этих страницах — 3-примарные: ранг 3-кручения, все слагаемые $\\mathbb Z/3$ (в таблицах Тоды 2003 года для сфер $S^n$, $n\\ge5$, — порядки слагаемых).<br>
 Раздел <a href="https://ispacex.github.io/ru/math/">«Математика»</a> на ispacex.github.io.""",
     "en": """A recomputation for R. Mikhailov's lecture “Coloured metalibraries. The mind of space”
-(2 September 2016). Data as of {date}. All numbers on these pages are 3-primary: the rank of the 3-torsion, all summands $\\mathbb Z/3$.<br>
+(2 September 2016). Data as of {date}. All numbers on these pages are 3-primary: the rank of the 3-torsion, all summands $\\mathbb Z/3$ (in Toda's 2003 tables for the spheres $S^n$, $n\\ge5$, the orders of the summands).<br>
 Part of <a href="https://ispacex.github.io/math/">Mathematics</a> at ispacex.github.io.""",
 }
 # a footer line of its own on the verifiability page: whom to write to about the proof
@@ -419,8 +427,15 @@ def main():
     dis5 = [n for n in range(4, tlast + 1) if left_5[n] != t03.get(n, 0)]
     pis = ", ".join(f"$\\pi_{{{n}}}$" for n in dis)
 
+    # Toda 2003, all columns (MATH-442): the checks of toda03/check.py, with the E_2 of the odd
+    # spheres from the tm job of toda03/e2_job.sh where it is in the tree
+    e2_dir = ROOT / "metalibrary" / "data" / "toda03_e2"
+    tchk, _ = toda_check.run(str(e2_dir) if e2_dir.exists() else None)
+    e2_info = (E2_INFO_RU, E2_INFO_EN) if e2_dir.exists() else ("(не считался)", "(not computed)")
+
     # ---------- data files: one set, written once, linked from both languages ----------
     shutil.copy(md / "e2_metalib.csv", OUT / "data" / "e2_metalib.csv")
+    TS.write_csv(OUT / "data" / "toda2003_groups.csv")
     shutil.copy(md / "e2_qgrade.csv", OUT / "data" / "e2_coloured.csv")
     shutil.copy(md / "sseq_S3_p3_150.csv", OUT / "data" / "sseq_S3_p3.csv")
     shutil.copy(md / "sseq_qgrade_S3_p3_150.csv", OUT / "data" / "sseq_qweight_S3_p3.csv")
@@ -437,7 +452,7 @@ def main():
     v = dict(E2=E2, El=El, nmax=nmax, last=last, nbrute=nbrute, nseq=nseq, sseq_n=sseq_n, t62=t62, t03=t03,
              tmax=tmax, tlast=tlast, left_l=left_l, left_h=left_h, left_5=left_5, diffs_l=diffs_l,
              diffs_h=diffs_h, diffs_5=diffs_5, agree_upto=agree_upto, dis=dis, zeros_rule=zeros_rule,
-             dis5=dis5, pis=pis)
+             dis5=dis5, pis=pis, tchk=tchk, e2_info=e2_info)
     for lang in LANGS:
         site(lang, v)
     nblocks = write_search({h: i for i, (h, _, _) in enumerate(NAV)})
@@ -447,6 +462,47 @@ def main():
         shutil.copy(HERE / f"og-{lang}.png", OUT / f"og-{lang}.png")
     (OUT / ".nojekyll").write_text("")
     print("site written to", OUT, "| final up to n =", last, "| agree up to", agree_upto, "| disagreements", dis)
+
+
+# The E_2 used by check D of Toda 2003 (metalibrary/data/toda03_e2/, the tm job of toda03/e2_job.sh)
+E2_INFO_RU = ("(задание tm kimmy/tm/20261107-005511-m442-e2-5270087: sseq/ext JoeyBF/sseq@7d63ea9, модуль <code>S_3[n]</code>, нечётные $n\\le37$, $k\\le79$; $H(\\Lambda(m))$, $m\\le18$, $k\\le58$; где посчитаны обе, они совпали во всех клетках $(n,k)$)")
+E2_INFO_EN = ("(tm job kimmy/tm/20261107-005511-m442-e2-5270087: sseq/ext JoeyBF/sseq@7d63ea9, module <code>S_3[n]</code>, odd $n\\le37$, $k\\le79$; $H(\\Lambda(m))$, $m\\le18$, $k\\le58$; where both ran they agree in every cell $(n,k)$)")
+
+# Discrepancies of Toda 2003 (MATH-442), each (ru, en)
+DISC = [
+    ("<b>$\\pi_{54}(S^9)$, $k=45$, $n=9$ — открыто.</b> Теорема 5.3 (1) (с. 53, PDF 60) даёт на $S^9$ простой неустойчивый элемент $(n,k)=(9,45)$ "
+     "($AB_2$ над точкой, $B_2$ под ней), т. е. mod A $\\pi^9_{54}\\supseteq\\mathbf Z/9\\oplus\\mathbf Z/3$; таблица §5.6 (с. 61) в $k=45$, $n=9$ "
+     "показывает только $\\circ$ (кольцо $\\varphi$), то есть $\\mathbf Z/9$. Стем $45\\equiv1\\pmod4$, α-семейств нет (при допущении об $A$ из проверки E), так что обе записи — о целой группе. "
+     "За теорему: пары $ab_2/AB_2$ стоят у Тоды в $(3,32)/(3,33)$, $(9,44)/(9,45)$, $(15,56)/(15,57)$, $(21,68)/(21,69)$, и в таблицах есть все, кроме $(9,45)$; "
+     "все остальные пары простых элементов $ab/AB$ в таблице §5.6 есть. Скорее всего, в таблице §5.6 пропущена точка, и "
+     "${}_3\\pi_{54}(S^9)=\\mathbf Z/9\\oplus\\mathbf Z/3$. $E_2$ этого не решает: $\\dim E_2(S^9)$ в стеме 45 равна 8, баланс дифференциалов сходится в обоих вариантах. "
+     "В сетке выше клетка оставлена как в таблице и отмечена красным. Это не наша ошибка прочтения: рецензент перечитал это место независимо.",
+     "<b>$\\pi_{54}(S^9)$, $k=45$, $n=9$: open.</b> Theorem 5.3 (1) (p. 53, PDF 60) has a removable simple unstable element at $(n,k)=(9,45)$ "
+     "($AB_2$ above the dot, $B_2$ below it), so mod A $\\pi^9_{54}\\supseteq\\mathbf Z/9\\oplus\\mathbf Z/3$; the table of §5.6 (p. 61) at $k=45$, $n=9$ "
+     "shows only the $\\circ$ of $\\varphi$, that is $\\mathbf Z/9$. The stem $45\\equiv1\\pmod4$ has no alpha families (by the assumption on $A$ of check E), so both speak of the whole group. "
+     "For the theorem: Toda's pairs $ab_2/AB_2$ stand at $(3,32)/(3,33)$, $(9,44)/(9,45)$, $(15,56)/(15,57)$, $(21,68)/(21,69)$, and the tables have all of them but $(9,45)$; "
+     "every other pair $ab/AB$ of simple elements is in the table of §5.6. Most likely the table of §5.6 misses a dot, and "
+     "${}_3\\pi_{54}(S^9)=\\mathbf Z/9\\oplus\\mathbf Z/3$. $E_2$ does not decide it: $\\dim E_2(S^9)$ in the stem 45 is 8, and the balance of the differentials works out either way. "
+     "In the grid above the cell is left as in the table and marked red. It is not our misreading: the reviewer re-read the place independently."),
+    ("<b>Опечатки в тексте §5</b> (на группы не влияют; в тексте помечены [sic]): $AAB_2$ вместо $ABB_2$ в (5.1.7); $ab_2^2$ дважды в (5.1.8); "
+     "«(13) of (5.5.1)» вместо (5.1.1) на с. 46; $\\beta^4$ вместо $\\beta_1^4$ и $y=b_2^2$ вместо $b^2b_2$ в (5.1.11); «und» в предложении 5.3; "
+     "$\\pi^5_{7+k}$ вместо $\\pi^7_{7+k}$ на с. 49; $H_p(\\partial\\alpha(\\xi))$ в лемме 5.2; метка $E^2$ вместо $E_2$ в диаграмме теоремы 5.4 (2), $k=53$; "
+     "в той же диаграмме при $k=55$ напечатано $\\bullet=\\bullet\\hookleftarrow\\bullet$, а таблица §5.6 и строки $k=43,45$ теоремы 5.3 дают $\\bullet\\hookleftarrow\\bullet=\\bullet$; "
+     "в таблице §5.6 при $k=49$ стабильная метка $\\alpha_1\\beta_1\\beta_2$ вместо $\\alpha_1\\beta_1^2\\beta_2$ ((17) в (5.1.1)).",
+     "<b>Misprints in the text of §5</b> (no effect on the groups; marked [sic] in the text): $AAB_2$ for $ABB_2$ in (5.1.7); $ab_2^2$ twice in (5.1.8); "
+     "“(13) of (5.5.1)” for (5.1.1) on p. 46; $\\beta^4$ for $\\beta_1^4$ and $y=b_2^2$ for $b^2b_2$ in (5.1.11); “und” in Proposition 5.3; "
+     "$\\pi^5_{7+k}$ for $\\pi^7_{7+k}$ on p. 49; $H_p(\\partial\\alpha(\\xi))$ in Lemma 5.2; the label $E^2$ for $E_2$ in the diagram of Theorem 5.4 (2), $k=53$; "
+     "in the same diagram at $k=55$ the print has $\\bullet=\\bullet\\hookleftarrow\\bullet$, whereas the table of §5.6 and the rows $k=43,45$ of Theorem 5.3 give $\\bullet\\hookleftarrow\\bullet=\\bullet$; "
+     "in the table of §5.6 the stable name at $k=49$ is $\\alpha_1\\beta_1\\beta_2$ for $\\alpha_1\\beta_1^2\\beta_2$ ((17) of (5.1.1))."),
+    ("<b>Скан:</b> страница «(3) Let $\\xi=\\alpha_1(7)\\circ\\varphi(10)$ …» напечатана дважды (PDF 65 и 66, номера 58 и 59, два оттиска одного текста); "
+     "в таблице §6.5 цепочки $k=74$ ($\\beta_5$) и $k=75$ ($\\mu$) заходят одним символом под заголовок «stable» — групп это не меняет.",
+     "<b>The scan:</b> the page “(3) Let $\\xi=\\alpha_1(7)\\circ\\varphi(10)$ …” is printed twice (PDF 65 and 66, numbered 58 and 59, two printings of one text); "
+     "in the table of §6.5 the chains of $k=74$ ($\\beta_5$) and $k=75$ ($\\mu$) run one symbol into the header “stable”, which changes no group."),
+    ("<b>Имена, не числа.</b> Стабильные образующие Тоды и таблицы A3.2 Равенеля называются по-разному: $\\epsilon'=\\langle\\alpha_1,\\alpha_1,\\beta_1^3\\rangle$, "
+     "$\\epsilon_1=\\beta_{3/2}$, $\\epsilon_2=\\beta_3$, $\\varphi=x_{45}$, $\\lambda=x_{68}$, $\\mu=x_{75}$; порядки совпадают везде (проверка B), и каждая — единственная образующая своего стема, так что они совпадают с точностью до обратимого множителя. Расхождений с Тодой 1962 и со стабильными стемами нет.",
+     "<b>Names, not numbers.</b> Toda's stable generators and those of Ravenel's Table A3.2 have different names: $\\epsilon'=\\langle\\alpha_1,\\alpha_1,\\beta_1^3\\rangle$, "
+     "$\\epsilon_1=\\beta_{3/2}$, $\\epsilon_2=\\beta_3$, $\\varphi=x_{45}$, $\\lambda=x_{68}$, $\\mu=x_{75}$; the orders agree everywhere (check B), and each is the only generator of its stem, so they agree up to a unit. There is no disagreement with Toda 1962 or with the stable stems."),
+]
 
 
 def site(lang, v):
@@ -459,6 +515,7 @@ def site(lang, v):
     left_l, left_h = v["left_l"], v["left_h"]
     diffs_l, diffs_h, diffs_5 = v["diffs_l"], v["diffs_h"], v["diffs_5"]
     agree_upto, zeros_rule, dis5, pis = v["agree_upto"], v["zeros_rule"], v["dis5"], v["pis"]
+    tchk, e2_info = v["tchk"], v["e2_info"]
 
     def family(n):
         if n % 4 == 2 and n >= 6:
@@ -626,11 +683,13 @@ The column “family” gives the class standing in the place of a Toda element 
             w.writerow(["k", "n", "printed", "alpha_added", "total", "toda1962", "source"])
             for r in trows:
                 w.writerow([r[0], r[1], r[2], r[3], r[4], r[5], r[6][0]])
-    page(lang, "toda2003.html", t("Столбец $S^3$ таблицы Тоды 2003 года", "The $S^3$ column of Toda's 2003 table"), t(f"""
+    page(lang, "toda2003.html", t("Таблица Тоды 2003 года", "Toda's 2003 table"), t(f"""
 <p>H. Toda, <i>Unstable 3-primary Homotopy Groups of Spheres</i>, Econoinformatics (Himeji Dokkyo University) <b>29</b> (2003), 1–77
 (NDL BibID 6899969, CiNii crid 1523669554954337536). Скан с OCR — на странице Д. Равенеля:
 <a href="https://www.sas.rochester.edu/mth/sites/doug-ravenel/otherpapers/Toda03-ocr.pdf">Toda03-ocr.pdf</a>
 (страницы PDF 67–68 — §5.6, $k\\le55$; 80–81 — §6.5, $56\\le k\\le79$).</p>
+<p>На странице: <a href="#s3">столбец $S^3$</a> (с α-семействами), <a href="#all">все столбцы</a> обеих таблиц, <a href="#checks">проверки</a>, <a href="#disc">расхождения</a>; текст §5 — <a href="toda2003_s5.html">отдельно</a>.</p>
+<h2 id=s3>Столбец $S^3$</h2>
 <div class="box">
 <p><b>Как читали.</b> Брали только столбец $n=3$, то есть $_3\\pi_{{3+k}}(S^3)={{}}_3\\pi_{{3+k}}(S^2)$. Каждая точка — $\\mathbb Z/3$ (по теореме Коэна–Мура–Нейзендорфера показатель 3-кручения $\\pi_*(S^3)$ равен 3). Строка таблицы, которая начинается правее $n=3$, не считается.</p>
 <p><b>«mod A».</b> Таблица §6.5 дана по модулю нестабильных α-семейств. По §4.3 такое семейство даёт на $S^3$ по одному $\\mathbb Z/3$ в стемах $rq-2$ и $rq-1$ ($q=4$), то есть при $k\\equiv2,3\\pmod4$: это сэндвичи и элементы Тоды. Мы добавили их обратно (колонка «+α»). <b>Это место нашего прочтения стоит проверить в первую очередь.</b></p>
@@ -640,13 +699,17 @@ The column “family” gives the class standing in the place of a Toda element 
 (NDL BibID 6899969, CiNii crid 1523669554954337536). An OCR'd scan is on D. Ravenel's page:
 <a href="https://www.sas.rochester.edu/mth/sites/doug-ravenel/otherpapers/Toda03-ocr.pdf">Toda03-ocr.pdf</a>
 (PDF pages 67–68: §5.6, $k\\le55$; 80–81: §6.5, $56\\le k\\le79$).</p>
+<p>On this page: <a href="#s3">the $S^3$ column</a> (with the alpha families), <a href="#all">all columns</a> of both tables, <a href="#checks">checks</a>, <a href="#disc">discrepancies</a>; the text of §5 is <a href="toda2003_s5.html">on its own page</a>.</p>
+<h2 id=s3>The $S^3$ column</h2>
 <div class="box">
 <p><b>How we read it.</b> We took only the column $n=3$, that is, $_3\\pi_{{3+k}}(S^3)={{}}_3\\pi_{{3+k}}(S^2)$. Each dot is a $\\mathbb Z/3$ (by the Cohen–Moore–Neisendorfer theorem the exponent of the 3-torsion of $\\pi_*(S^3)$ is 3). A row of the table that starts to the right of $n=3$ is not counted.</p>
 <p><b>“mod A”.</b> The table of §6.5 is given modulo the unstable α-families. By §4.3 such a family contributes to $S^3$ one $\\mathbb Z/3$ in each of the stems $rq-2$ and $rq-1$ ($q=4$), that is, for $k\\equiv2,3\\pmod4$: these are the sandwiches and the Toda elements. We added them back (column “+α”). <b>This is the point of our reading to check first.</b></p>
 <p>Checks of the reading: for $n\\le22$ it agrees with Toda's 1962 book; for no $n$ does it exceed $E_2$.</p></div>
 """) + f"""{table(t(["k", "n", "напечатано", "+α", "итого", "Тода 1962", "<l>источник", "<l>"],
                    ["k", "n", "printed", "+α", "total", "Toda 1962", "<l>source", "<l>"]), trows)}
-<p><a href="data/toda2003_S3.csv">toda2003_S3.csv</a></p>""")
+<p><a href="data/toda2003_S3.csv">toda2003_S3.csv</a></p>""" + TS.toda_more(lang, tchk, t(*e2_info), DISC))
+    page(lang, "toda2003_s5.html", t("Тода 2003, §5: старая таблица 3-примарных групп", "Toda 2003, §5: Old Table of 3-primary Groups"),
+         TS.s5_page(lang))
 
     # ---------- method ----------
     page(lang, "method.html", t("Метод и проверки", "Method and checks"), t(f"""
@@ -717,6 +780,7 @@ A word is admissible if the index following $\\lambda_i$ is $\\le 3i-1$ and the 
 <li><a href="data/sseq_S3_p3.csv">sseq_S3_p3.csv</a> — тот же Ext из sseq/ext без веса: строки <code>n,s,dim</code>, $n\\le{nseq}$.</li>
 <li><a href="data/differentials.json">differentials.json</a> — дифференциалы хищного правила (оба заполнения и вариант с $d_5$).</li>
 <li><a href="data/toda2003_S3.csv">toda2003_S3.csv</a> — наше прочтение столбца $S^3$ таблицы Тоды 2003 года.</li>
+<li><a href="data/toda2003_groups.csv">toda2003_groups.csv</a> — все клетки таблиц §5.6 и §6.5 Тоды 2003 года, все нечётные сферы (<a href="toda2003.html#all">страница</a>).</li>
 </ul>""", f"""
 <ul>
 <li><a href="data/comparison.csv">comparison.csv</a>: by $n$, $E_2$, the rapacious rule (“low”/“high”), Toda 2003, Toda 1962, family, lecture (the last two columns are in Russian).</li>
@@ -726,6 +790,7 @@ A word is admissible if the index following $\\lambda_i$ is $\\le 3i-1$ and the 
 <li><a href="data/sseq_S3_p3.csv">sseq_S3_p3.csv</a>: the same Ext from sseq/ext without the weight; rows <code>n,s,dim</code>, $n\\le{nseq}$.</li>
 <li><a href="data/differentials.json">differentials.json</a>: the differentials of the rapacious rule (both fillings and the variant with $d_5$).</li>
 <li><a href="data/toda2003_S3.csv">toda2003_S3.csv</a>: our reading of the $S^3$ column of Toda's 2003 table (the source column is in Russian).</li>
+<li><a href="data/toda2003_groups.csv">toda2003_groups.csv</a>: every cell of the tables of §5.6 and §6.5 of Toda 2003, all odd spheres (<a href="toda2003.html#all">page</a>).</li>
 </ul>"""))
 
     # ---------- index ----------

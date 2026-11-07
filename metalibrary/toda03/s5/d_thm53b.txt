@@ -1,0 +1,17 @@
+# p. 53 (PDF 60), Theorem 5.3 (2) Removable short range unstable elements; no arrows in the source
+36 | u | 8!:B^2 | 12!:ab
+36 | m | 9:*=*<~*
+36 | l | 12!:AB | 14!:b
+40 | u | 4!:ab^3 | 6!:ab_2
+40 | m | 5:*<~*
+40 | l | 6!:AB_2 | 8!:b_2
+41 | u | 4!:AB^3 | 6!:b^3
+41 | m | 5:*<~*
+41 | l | 6!:B^3 | 8!:B_2
+# p. 54 (PDF 61), continued
+43 | u | 10!:AB^2 | 12!:b^2
+43 | m | 11:*<~*=*
+43 | l | 12!:B^2 | 16!:ab
+45 | u | 16!:AB | 18!:b
+45 | m | 17:*<~*=*
+45 | l | 18!:B | 22!:a

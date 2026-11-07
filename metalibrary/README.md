@@ -97,6 +97,7 @@ metalibrary had to be computed here.
   (https://github.com/ispacex/sseq, branch `math-54-qgrade`, example `qgrade_dims`) and its check
   against the lambda algebra: `data/sseq_qgrade_S3_p3_150.csv`, `data/e2_qgrade.csv` ($E^2$ with colours up to $\pi_{150}$).
 - `toda2003.py`: Toda's 2003 table (3-primary $\pi_{3+k}(S^3)$, $k\le79$), read from the scan.
+- `toda03/` (MATH-442): all columns of Toda's 2003 tables (§5.6, odd $n\le29$, $k\le55$; §6.5 mod A, odd $n\le37$, $56\le k\le79$) and the text of §5, transcribed from the page images (`t56.txt`, `t65.txt`, `s5/`; the line format is in `toda2003.py`); `check.py` checks the reading against the stable stems (Ravenel A3.2, im $J$), Toda 1962 (Ravenel A3.4), the unstable $E_2$ of the odd spheres and Toda's own diagrams; `e2_job.sh` computes that $E_2$ (sseq/ext and `rust/src/bin/lambdan.rs`, $H(\Lambda(m))$) as a tm job, its output is `data/toda03_e2/`.
 - `data/s2_3torsion.csv`: the 3-torsion of $\pi_n(S^2)$ by Toda's 1962 table ($n\le22$, column
   `toda_rank`), the Toda elements and sandwiches (Ivanov–Mikhailov–Wu) and the statements of the
   lecture; checked against two reprints of Toda's table (Ravenel, Table A3.4, and the PKU table).

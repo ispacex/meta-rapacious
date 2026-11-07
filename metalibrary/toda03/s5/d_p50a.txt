@@ -1,0 +1,7 @@
+# p. 50 (PDF 57), (2) Removable short range unstable elements; labels without arrows (deleted in the source)
+21 | u | 4!:AB | 6!:b
+21 | m | 5:*<~*=*
+21 | l | 6!:B | 10!:a
+24 | u | 2!:B^2 | 6!:ab
+24 | m | 3:*=*<~*
+24 | l | 6!:AB | 8!:b
