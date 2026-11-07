@@ -472,14 +472,14 @@ E2_INFO_EN = ("(tm job kimmy/tm/20261107-005511-m442-e2-5270087: sseq/ext JoeyBF
 DISC = [
     ("<b>$\\pi_{54}(S^9)$, $k=45$, $n=9$ — открыто.</b> Теорема 5.3 (1) (с. 53, PDF 60) даёт на $S^9$ простой неустойчивый элемент $(n,k)=(9,45)$ "
      "($AB_2$ над точкой, $B_2$ под ней), т. е. mod A $\\pi^9_{54}\\supseteq\\mathbf Z/9\\oplus\\mathbf Z/3$; таблица §5.6 (с. 61) в $k=45$, $n=9$ "
-     "показывает только $\\circ$ (кольцо $\\varphi$), то есть $\\mathbf Z/9$. Стем $45\\equiv1\\pmod4$, α-семейств нет, так что обе записи — о целой группе. "
+     "показывает только $\\circ$ (кольцо $\\varphi$), то есть $\\mathbf Z/9$. Стем $45\\equiv1\\pmod4$, α-семейств нет (при допущении об $A$ из проверки E), так что обе записи — о целой группе. "
      "За теорему: пары $ab_2/AB_2$ стоят у Тоды в $(3,32)/(3,33)$, $(9,44)/(9,45)$, $(15,56)/(15,57)$, $(21,68)/(21,69)$, и в таблицах есть все, кроме $(9,45)$; "
      "все остальные пары простых элементов $ab/AB$ в таблице §5.6 есть. Скорее всего, в таблице §5.6 пропущена точка, и "
      "${}_3\\pi_{54}(S^9)=\\mathbf Z/9\\oplus\\mathbf Z/3$. $E_2$ этого не решает: $\\dim E_2(S^9)$ в стеме 45 равна 8, баланс дифференциалов сходится в обоих вариантах. "
      "В сетке выше клетка оставлена как в таблице и отмечена красным. Это не наша ошибка прочтения: рецензент перечитал это место независимо.",
      "<b>$\\pi_{54}(S^9)$, $k=45$, $n=9$: open.</b> Theorem 5.3 (1) (p. 53, PDF 60) has a removable simple unstable element at $(n,k)=(9,45)$ "
      "($AB_2$ above the dot, $B_2$ below it), so mod A $\\pi^9_{54}\\supseteq\\mathbf Z/9\\oplus\\mathbf Z/3$; the table of §5.6 (p. 61) at $k=45$, $n=9$ "
-     "shows only the $\\circ$ of $\\varphi$, that is $\\mathbf Z/9$. The stem $45\\equiv1\\pmod4$ has no alpha families, so both speak of the whole group. "
+     "shows only the $\\circ$ of $\\varphi$, that is $\\mathbf Z/9$. The stem $45\\equiv1\\pmod4$ has no alpha families (by the assumption on $A$ of check E), so both speak of the whole group. "
      "For the theorem: Toda's pairs $ab_2/AB_2$ stand at $(3,32)/(3,33)$, $(9,44)/(9,45)$, $(15,56)/(15,57)$, $(21,68)/(21,69)$, and the tables have all of them but $(9,45)$; "
      "every other pair $ab/AB$ of simple elements is in the table of §5.6. Most likely the table of §5.6 misses a dot, and "
      "${}_3\\pi_{54}(S^9)=\\mathbf Z/9\\oplus\\mathbf Z/3$. $E_2$ does not decide it: $\\dim E_2(S^9)$ in the stem 45 is 8, and the balance of the differentials works out either way. "
@@ -499,9 +499,9 @@ DISC = [
      "<b>The scan:</b> the page “(3) Let $\\xi=\\alpha_1(7)\\circ\\varphi(10)$ …” is printed twice (PDF 65 and 66, numbered 58 and 59, two printings of one text); "
      "in the table of §6.5 the chains of $k=74$ ($\\beta_5$) and $k=75$ ($\\mu$) run one symbol into the header “stable”, which changes no group."),
     ("<b>Имена, не числа.</b> Стабильные образующие Тоды и таблицы A3.2 Равенеля называются по-разному: $\\epsilon'=\\langle\\alpha_1,\\alpha_1,\\beta_1^3\\rangle$, "
-     "$\\epsilon_1=\\beta_{3/2}$, $\\epsilon_2=\\beta_3$, $\\varphi=x_{45}$, $\\lambda=x_{68}$, $\\mu=x_{75}$; порядки совпадают везде (проверка B). Расхождений с Тодой 1962 и со стабильными стемами нет.",
+     "$\\epsilon_1=\\beta_{3/2}$, $\\epsilon_2=\\beta_3$, $\\varphi=x_{45}$, $\\lambda=x_{68}$, $\\mu=x_{75}$; порядки совпадают везде (проверка B), и каждая — единственная образующая своего стема, так что они совпадают с точностью до обратимого множителя. Расхождений с Тодой 1962 и со стабильными стемами нет.",
      "<b>Names, not numbers.</b> Toda's stable generators and those of Ravenel's Table A3.2 have different names: $\\epsilon'=\\langle\\alpha_1,\\alpha_1,\\beta_1^3\\rangle$, "
-     "$\\epsilon_1=\\beta_{3/2}$, $\\epsilon_2=\\beta_3$, $\\varphi=x_{45}$, $\\lambda=x_{68}$, $\\mu=x_{75}$; the orders agree everywhere (check B). There is no disagreement with Toda 1962 or with the stable stems."),
+     "$\\epsilon_1=\\beta_{3/2}$, $\\epsilon_2=\\beta_3$, $\\varphi=x_{45}$, $\\lambda=x_{68}$, $\\mu=x_{75}$; the orders agree everywhere (check B), and each is the only generator of its stem, so they agree up to a unit. There is no disagreement with Toda 1962 or with the stable stems."),
 ]
 
 

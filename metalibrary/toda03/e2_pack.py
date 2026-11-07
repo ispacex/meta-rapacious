@@ -2,7 +2,7 @@
 """Packs (KLAM as in e2_job.sh) the output of e2_job.sh into one text file (e2_packed.txt, read by check.py):
 
     L n k s:dim,s:dim,...      H(Lambda(m)) for S^n, n = 2m + 1, stem k
-    S n k s:dim,s:dim,...      sseq/ext, resolve_unstable of S_n[3], stem k = t - s - n
+    S n k s:dim,s:dim,...      sseq/ext, resolve_unstable of S_3[n] (S^n), stem k = (t - s) - n
 
     python3 -I e2_pack.py JOB_OUT > e2_packed.txt
 """
@@ -26,10 +26,10 @@ for f in sorted(d.glob("sseq_S*.csv"), key=lambda p: int(re.search(r"(\d+)", p.n
     n = int(re.search(r"S(\d+)", f.name).group(1))
     acc, kmax = collections.defaultdict(dict), None
     for line in f.read_text().splitlines():
-        t, s, x = map(int, line.split(","))
-        kmax = t - n if kmax is None else max(kmax, t - n)
-        if x and t - n >= 1:
-            acc[t - n][s] = x
+        ts, s, x = map(int, line.split(","))   # ts = t - s, the homotopy degree
+        kmax = ts - n if kmax is None else max(kmax, ts - n)
+        if x and ts - n >= 1:
+            acc[ts - n][s] = x
     if kmax is None:
         continue
     print("#S", n, "kmax", kmax)
